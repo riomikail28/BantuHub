@@ -572,6 +572,7 @@ Seeder membuat:
 - Role: `admin`, `customer`, `provider`
 - User admin awal dari variabel `.env`
 - Kategori jasa awal
+- Data demo untuk testing manual dan presentasi pada environment non-testing
 
 Variabel admin:
 
@@ -580,6 +581,46 @@ ADMIN_NAME="BantuHub Admin"
 ADMIN_EMAIL=admin@bantuhub.test
 ADMIN_PASSWORD=password
 ```
+
+## Akun Demo
+
+Seeder demo membuat akun berikut:
+
+| Role | Email | Password |
+| --- | --- | --- |
+| Admin | `admin@bantuhub.test` | `password` |
+| Customer | `customer@bantuhub.test` | `password` |
+| Provider | `provider@bantuhub.test` | `password` |
+
+Provider demo memiliki:
+
+- `users.status = active`
+- `provider_profiles.verification_status = verified`
+
+Data demo juga mencakup:
+
+- Customer tambahan
+- Provider verified tambahan
+- Service aktif untuk Jasa Rumah, Jasa Elektronik, Jasa Kreatif Digital, dan Jasa Care & Pendampingan Non-Medis
+- Booking dengan status berbeda
+- Payment paid dengan fee dari `config('bantuhub.platform_fee_percent')`
+- Review, complaint, dan admin notes CRM
+
+Contoh layanan demo:
+
+- Cleaning Rumah Harian
+- Service AC 1 PK
+- Install Ulang Laptop
+- Desain Logo UMKM
+- Pendamping Pasien Rumah Sakit Non-Medis
+
+## Checklist Testing Manual
+
+- Login admin dan cek dashboard, payment approval, reports, complaint, dan CRM.
+- Login provider demo dan cek layanan, booking masuk, earnings, reviews, dan complaints.
+- Login customer demo dan cek orders, payment status, reviews, dan complaints.
+- Cek public discovery: `GET /api/categories`, `GET /api/services`, dan detail service.
+- Pastikan transaksi paid menghitung platform fee sesuai config BantuHub.
 
 ## Status Implementasi
 

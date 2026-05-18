@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { dashboardPathForRole, setAuthSession } from "@/lib/auth";
 import { postJson } from "@/lib/api";
+import { extractApiErrors } from "@/lib/errors";
 import type { AuthUserPayload } from "@/types/user";
 
 export default function LoginPage() {
@@ -27,8 +28,8 @@ export default function LoginPage() {
       const response = await postJson<AuthUserPayload>("/auth/login", { email, password, device_name: "frontend-web" });
       setAuthSession(response.data);
       router.push(dashboardPathForRole(response.data.role.name));
-    } catch {
-      setError("Email atau password tidak valid.");
+    } catch (error) {
+      setError(extractApiErrors(error, "Email atau password tidak valid.")[0]);
     } finally {
       setLoading(false);
     }

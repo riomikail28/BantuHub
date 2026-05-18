@@ -13,5 +13,9 @@ class DatabaseSeeder extends Seeder
             ServiceCategorySeeder::class,
             AdminUserSeeder::class,
         ]);
+
+        if (! app()->environment('testing')) {
+            $this->call(DemoDataSeeder::class);
+        }
     }
 }

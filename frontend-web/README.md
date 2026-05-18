@@ -23,6 +23,16 @@ Frontend lokal berjalan di:
 http://localhost:3000
 ```
 
+## Akun Demo
+
+Jalankan backend dengan `php artisan migrate:fresh --seed`, lalu gunakan akun berikut:
+
+| Role | Email | Password |
+| --- | --- | --- |
+| Admin | `admin@bantuhub.test` | `password` |
+| Customer | `customer@bantuhub.test` | `password` |
+| Provider | `provider@bantuhub.test` | `password` |
+
 ## Fitur Tahap Awal
 
 - Homepage
@@ -43,3 +53,18 @@ Halaman admin yang sudah terhubung ke Laravel API:
 - `/admin/providers` menggunakan `/api/admin/providers` dan aksi approve/reject/suspend
 
 Pastikan login sebagai user dengan role `admin`. Token disimpan di `localStorage` untuk tahap MVP.
+
+## Checklist Testing Manual
+
+- `/` tampil baik di desktop dan mobile.
+- `/services` bisa filter kategori, metode layanan, harga minimum/maksimum, dan keyword.
+- `/services/[id]` menampilkan detail layanan dan modal booking untuk customer login.
+- `/customer/orders` menampilkan detail booking, payment, review, dan complaint.
+- `/provider/bookings` menampilkan detail booking dan aksi update status.
+- `/admin/dashboard`, `/admin/payments`, dan `/admin/reports` menampilkan data dari API.
+
+## Verifikasi
+
+```bash
+npm run build
+```

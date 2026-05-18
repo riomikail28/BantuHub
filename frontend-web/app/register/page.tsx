@@ -2,7 +2,6 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import { PublicLayout } from "@/layouts/PublicLayout";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -10,15 +9,8 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { postJson } from "@/lib/api";
+import { extractApiErrors } from "@/lib/errors";
 import type { AuthUserPayload, UserRoleName } from "@/types/user";
-
-interface LaravelErrorResponse {
-  message?: string;
-  errors?: Record<string, string[]>;
-  data?: {
-    errors?: Record<string, string[]>;
-  };
-}
 
 const initialForm = {
   name: "",
@@ -84,7 +76,7 @@ export default function RegisterPage() {
         router.push("/login");
       }, 1000);
     } catch (error) {
-      setErrors(extractRegisterErrors(error));
+      setErrors(extractApiErrors(error, "Registrasi gagal. Periksa kembali data yang diisi."));
     } finally {
       setLoading(false);
     }
@@ -158,30 +150,4 @@ export default function RegisterPage() {
       </main>
     </PublicLayout>
   );
-}
-
-function extractRegisterErrors(error: unknown): string[] {
-  if (axios.isAxiosError<LaravelErrorResponse>(error)) {
-    const validationErrors = error.response?.data?.errors || error.response?.data?.data?.errors;
-
-    if (validationErrors) {
-      return Object.entries(validationErrors).flatMap(([field, messages]) =>
-        messages.map((message) => normalizeValidationMessage(field, message)),
-      );
-    }
-
-    if (error.response?.data?.message) {
-      return [error.response.data.message];
-    }
-  }
-
-  return ["Registrasi gagal. Periksa kembali data yang diisi."];
-}
-
-function normalizeValidationMessage(field: string, message: string): string {
-  if (field === "email" && /taken/i.test(message)) {
-    return "Email sudah digunakan. Silakan login atau gunakan email lain.";
-  }
-
-  return message;
 }
