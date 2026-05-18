@@ -326,6 +326,76 @@ Flow status provider tahap ini:
 
 Setiap perubahan status dicatat di `booking_status_logs`.
 
+## Payment Manual dan Fee Platform
+
+Endpoint payment customer wajib memakai bearer token Sanctum milik user dengan role `customer`:
+
+```text
+POST /api/customer/bookings/{id}/payment
+GET  /api/customer/bookings/{id}/payment
+```
+
+Payment hanya bisa dibuat jika booking milik customer tersebut dan `bookings.status = waiting_payment`.
+
+Contoh upload payment manual:
+
+```json
+{
+  "payment_method": "manual_transfer",
+  "payment_proof": "payments/proof-transfer.jpg"
+}
+```
+
+Nilai `payment_method`:
+
+- `manual_transfer`
+- `cash`
+
+Endpoint payment admin wajib memakai bearer token Sanctum milik user dengan role `admin`:
+
+```text
+GET /api/admin/payments
+GET /api/admin/payments/{id}
+PUT /api/admin/payments/{id}/approve
+PUT /api/admin/payments/{id}/reject
+```
+
+Contoh reject payment:
+
+```json
+{
+  "admin_note": "Bukti pembayaran tidak terbaca."
+}
+```
+
+Jika admin approve payment:
+
+- `payments.payment_status` menjadi `paid`
+- `payments.paid_at` diisi
+- `payments.verified_by` diisi user admin
+- `bookings.status` menjadi `paid`
+- perubahan status booking dicatat ke `booking_status_logs`
+
+Endpoint earning provider wajib memakai bearer token Sanctum milik user dengan role `provider`:
+
+```text
+GET /api/provider/earnings
+```
+
+Fee platform mengikuti `config('bantuhub.platform_fee_percent')`.
+
+Contoh perhitungan:
+
+```text
+service_price = 200000
+platform_fee_percent = 2
+platform_fee_amount = 4000
+provider_earning = 196000
+total_payment = 200000
+```
+
+Payment gateway asli belum dibuat pada tahap ini.
+
 ## Seeder Awal
 
 Seeder membuat:
