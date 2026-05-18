@@ -8,6 +8,8 @@ export interface Review {
   provider_id: number;
   rating: number;
   review_text?: string | null;
+  created_at?: string;
+  updated_at?: string;
   booking?: Booking;
   customer?: User;
   provider?: User;

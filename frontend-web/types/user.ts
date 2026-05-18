@@ -19,6 +19,7 @@ export interface AuthProfile {
   id: number;
   user_id: number;
   business_name?: string | null;
+  bio?: string | null;
   verification_status?: string;
   rating_average?: string | number;
   rating_count?: number;
