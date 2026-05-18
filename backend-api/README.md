@@ -155,6 +155,65 @@ Status verifikasi provider:
 
 Suspend provider akan mengubah `users.status` menjadi `suspended`.
 
+## Provider API
+
+Semua endpoint provider wajib memakai bearer token Sanctum milik user dengan role `provider`.
+
+```text
+GET    /api/provider/dashboard
+GET    /api/provider/profile
+PUT    /api/provider/profile
+GET    /api/provider/categories
+GET    /api/provider/services
+POST   /api/provider/services
+GET    /api/provider/services/{id}
+PUT    /api/provider/services/{id}
+DELETE /api/provider/services/{id}
+```
+
+`POST /api/provider/services` juga memakai middleware `provider.approved`. Provider dengan `verification_status` selain `verified` atau user `status` selain `active` tidak bisa membuat layanan.
+
+Contoh update provider profile:
+
+```json
+{
+  "business_name": "Bantu Service",
+  "bio": "Mitra layanan perbaikan rumah dan elektronik.",
+  "address": "Jl. Contoh No. 1",
+  "city": "Jakarta",
+  "province": "DKI Jakarta",
+  "postal_code": "12345"
+}
+```
+
+Contoh create service:
+
+```json
+{
+  "category_id": 1,
+  "name": "AC Cleaning",
+  "description": "Cleaning AC rumah.",
+  "price": 125000,
+  "duration_minutes": 60,
+  "service_method": "home_service",
+  "image": "services/ac-cleaning.jpg"
+}
+```
+
+Nilai `service_method`:
+
+- `home_service`
+- `visit_store`
+- `online_service`
+
+Nilai `services.status`:
+
+- `pending_review`
+- `active`
+- `inactive`
+
+`DELETE /api/provider/services/{id}` tidak menghapus data secara fisik. Endpoint ini menonaktifkan layanan dengan mengubah `status` menjadi `inactive`.
+
 ## Seeder Awal
 
 Seeder membuat:
