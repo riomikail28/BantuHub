@@ -1,5 +1,6 @@
 import type { Service } from "./service";
 import type { User } from "./user";
+import type { Payment } from "./payment";
 
 export type BookingStatus =
   | "pending"
@@ -23,6 +24,8 @@ export interface Booking {
   booking_date: string;
   booking_time: string;
   service_method: string;
+  address?: string | null;
+  customer_note?: string | null;
   status: BookingStatus;
   total_price: string | number;
   created_at?: string;
@@ -30,4 +33,5 @@ export interface Booking {
   service?: Service;
   customer?: User;
   provider?: User;
+  payment?: Payment | null;
 }

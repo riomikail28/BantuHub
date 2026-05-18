@@ -13,6 +13,8 @@ export interface User {
   phone?: string | null;
   status: string;
   role?: Role;
+  provider_profile?: AuthProfile | null;
+  customer_profile?: AuthProfile | null;
 }
 
 export interface AuthProfile {

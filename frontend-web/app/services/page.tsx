@@ -18,13 +18,15 @@ export default function ServicesPage() {
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({ keyword: "", category_id: "", service_method: "" });
+  const [filters, setFilters] = useState({ keyword: "", category_id: "", service_method: "", min_price: "", max_price: "" });
 
   const params = useMemo(
     () => ({
       keyword: filters.keyword || undefined,
       category_id: filters.category_id || undefined,
       service_method: filters.service_method || undefined,
+      min_price: filters.min_price || undefined,
+      max_price: filters.max_price || undefined,
     }),
     [filters],
   );
@@ -55,7 +57,7 @@ export default function ServicesPage() {
             <h1 className="text-3xl font-bold text-ink">Layanan tersedia</h1>
             <p className="mt-2 text-muted">Temukan jasa aktif dari mitra yang sudah diverifikasi.</p>
           </div>
-          <div className="grid gap-3 sm:grid-cols-3 md:w-[680px]">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5 xl:w-[920px]">
             <Input
               aria-label="Cari layanan"
               placeholder="Cari layanan"
@@ -84,6 +86,20 @@ export default function ServicesPage() {
               <option value="visit_store">Visit store</option>
               <option value="online_service">Online service</option>
             </Select>
+            <Input
+              aria-label="Harga minimum"
+              placeholder="Min harga"
+              type="number"
+              value={filters.min_price}
+              onChange={(event) => setFilters((current) => ({ ...current, min_price: event.target.value }))}
+            />
+            <Input
+              aria-label="Harga maksimum"
+              placeholder="Max harga"
+              type="number"
+              value={filters.max_price}
+              onChange={(event) => setFilters((current) => ({ ...current, max_price: event.target.value }))}
+            />
           </div>
         </div>
 
