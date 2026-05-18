@@ -59,6 +59,16 @@ class Booking extends Model
         return $this->hasOne(Payment::class);
     }
 
+    public function review(): HasOne
+    {
+        return $this->hasOne(Review::class);
+    }
+
+    public function complaints(): HasMany
+    {
+        return $this->hasMany(Complaint::class);
+    }
+
     public function addStatusLog(?string $oldStatus, string $newStatus, ?int $changedBy, ?string $note = null): BookingStatusLog
     {
         return $this->statusLogs()->create([

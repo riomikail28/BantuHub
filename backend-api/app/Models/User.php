@@ -68,6 +68,26 @@ class User extends Authenticatable
         return $this->hasMany(Booking::class, 'provider_id');
     }
 
+    public function customerReviews(): HasMany
+    {
+        return $this->hasMany(Review::class, 'customer_id');
+    }
+
+    public function providerReviews(): HasMany
+    {
+        return $this->hasMany(Review::class, 'provider_id');
+    }
+
+    public function customerComplaints(): HasMany
+    {
+        return $this->hasMany(Complaint::class, 'customer_id');
+    }
+
+    public function providerComplaints(): HasMany
+    {
+        return $this->hasMany(Complaint::class, 'provider_id');
+    }
+
     public function hasRole(string $role): bool
     {
         return $this->role?->name === $role;

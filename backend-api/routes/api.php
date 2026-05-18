@@ -4,18 +4,24 @@ use App\Http\Controllers\Api\Admin\CustomerController as AdminCustomerController
 use App\Http\Controllers\Api\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Api\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Api\Admin\ProviderController as AdminProviderController;
+use App\Http\Controllers\Api\Admin\ComplaintController as AdminComplaintController;
+use App\Http\Controllers\Api\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Api\Admin\ServiceCategoryController as AdminServiceCategoryController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\Customer\BookingController as CustomerBookingController;
 use App\Http\Controllers\Api\Customer\CategoryController as CustomerCategoryController;
+use App\Http\Controllers\Api\Customer\ComplaintController as CustomerComplaintController;
 use App\Http\Controllers\Api\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Api\Customer\PaymentController as CustomerPaymentController;
+use App\Http\Controllers\Api\Customer\ReviewController as CustomerReviewController;
 use App\Http\Controllers\Api\Customer\ServiceController as CustomerServiceController;
 use App\Http\Controllers\Api\Provider\BookingController as ProviderBookingController;
 use App\Http\Controllers\Api\Provider\CategoryController as ProviderCategoryController;
+use App\Http\Controllers\Api\Provider\ComplaintController as ProviderComplaintController;
 use App\Http\Controllers\Api\Provider\DashboardController as ProviderDashboardController;
 use App\Http\Controllers\Api\Provider\EarningController as ProviderEarningController;
 use App\Http\Controllers\Api\Provider\ProfileController as ProviderProfileController;
+use App\Http\Controllers\Api\Provider\ReviewController as ProviderReviewController;
 use App\Http\Controllers\Api\Provider\ServiceController as ProviderServiceController;
 use Illuminate\Support\Facades\Route;
 
@@ -65,6 +71,14 @@ Route::middleware(['auth:sanctum', 'role:admin'])
         Route::get('/payments/{payment}', [AdminPaymentController::class, 'show']);
         Route::put('/payments/{payment}/approve', [AdminPaymentController::class, 'approve']);
         Route::put('/payments/{payment}/reject', [AdminPaymentController::class, 'reject']);
+
+        Route::get('/reviews', [AdminReviewController::class, 'index']);
+
+        Route::get('/complaints', [AdminComplaintController::class, 'index']);
+        Route::get('/complaints/{complaint}', [AdminComplaintController::class, 'show']);
+        Route::put('/complaints/{complaint}/process', [AdminComplaintController::class, 'process']);
+        Route::put('/complaints/{complaint}/resolve', [AdminComplaintController::class, 'resolve']);
+        Route::put('/complaints/{complaint}/reject', [AdminComplaintController::class, 'reject']);
     });
 
 Route::middleware(['auth:sanctum', 'role:provider'])
@@ -88,6 +102,9 @@ Route::middleware(['auth:sanctum', 'role:provider'])
         Route::put('/bookings/{booking}/status', [ProviderBookingController::class, 'updateStatus']);
 
         Route::get('/earnings', ProviderEarningController::class);
+        Route::get('/reviews', [ProviderReviewController::class, 'index']);
+        Route::get('/complaints', [ProviderComplaintController::class, 'index']);
+        Route::get('/complaints/{complaint}', [ProviderComplaintController::class, 'show']);
     });
 
 Route::middleware(['auth:sanctum', 'role:customer'])
@@ -99,4 +116,9 @@ Route::middleware(['auth:sanctum', 'role:customer'])
         Route::get('/bookings/{booking}', [CustomerBookingController::class, 'show']);
         Route::post('/bookings/{booking}/payment', [CustomerPaymentController::class, 'store']);
         Route::get('/bookings/{booking}/payment', [CustomerPaymentController::class, 'show']);
+        Route::post('/bookings/{booking}/review', [CustomerReviewController::class, 'store']);
+        Route::get('/reviews', [CustomerReviewController::class, 'index']);
+        Route::post('/bookings/{booking}/complaint', [CustomerComplaintController::class, 'store']);
+        Route::get('/complaints', [CustomerComplaintController::class, 'index']);
+        Route::get('/complaints/{complaint}', [CustomerComplaintController::class, 'show']);
     });

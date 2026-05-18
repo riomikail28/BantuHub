@@ -396,6 +396,94 @@ total_payment = 200000
 
 Payment gateway asli belum dibuat pada tahap ini.
 
+## Review dan Rating
+
+Endpoint customer:
+
+```text
+POST /api/customer/bookings/{id}/review
+GET  /api/customer/reviews
+```
+
+Review hanya bisa dibuat oleh customer pemilik booking jika status booking `paid` atau `completed`. Satu booking hanya boleh memiliki satu review.
+
+Contoh create review:
+
+```json
+{
+  "rating": 5,
+  "review_text": "Layanan cepat dan rapi."
+}
+```
+
+Setelah review dibuat, sistem menghitung ulang `provider_profiles.rating_average` dan `provider_profiles.rating_count`.
+
+Endpoint provider:
+
+```text
+GET /api/provider/reviews
+```
+
+Endpoint admin:
+
+```text
+GET /api/admin/reviews
+```
+
+## Complaint
+
+Endpoint customer:
+
+```text
+POST /api/customer/bookings/{id}/complaint
+GET  /api/customer/complaints
+GET  /api/customer/complaints/{id}
+```
+
+Complaint hanya bisa dibuat oleh customer pemilik booking jika status booking `paid`, `completed`, atau `complaint`. Saat complaint dibuat, booking status berubah menjadi `complaint` dan perubahan dicatat di `booking_status_logs`.
+
+Contoh create complaint:
+
+```json
+{
+  "complaint_text": "Layanan belum sesuai dengan kesepakatan."
+}
+```
+
+Endpoint provider:
+
+```text
+GET /api/provider/complaints
+GET /api/provider/complaints/{id}
+```
+
+Provider hanya bisa melihat complaint yang berkaitan dengan booking miliknya.
+
+Endpoint admin:
+
+```text
+GET /api/admin/complaints
+GET /api/admin/complaints/{id}
+PUT /api/admin/complaints/{id}/process
+PUT /api/admin/complaints/{id}/resolve
+PUT /api/admin/complaints/{id}/reject
+```
+
+Contoh update complaint oleh admin:
+
+```json
+{
+  "admin_response": "Komplain sedang ditinjau oleh admin."
+}
+```
+
+Status complaint:
+
+- `pending`
+- `process`
+- `resolved`
+- `rejected`
+
 ## Seeder Awal
 
 Seeder membuat:
