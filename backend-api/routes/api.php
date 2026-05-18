@@ -5,6 +5,9 @@ use App\Http\Controllers\Api\Admin\DashboardController as AdminDashboardControll
 use App\Http\Controllers\Api\Admin\ProviderController as AdminProviderController;
 use App\Http\Controllers\Api\Admin\ServiceCategoryController as AdminServiceCategoryController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\Customer\CategoryController as CustomerCategoryController;
+use App\Http\Controllers\Api\Customer\DashboardController as CustomerDashboardController;
+use App\Http\Controllers\Api\Customer\ServiceController as CustomerServiceController;
 use App\Http\Controllers\Api\Provider\CategoryController as ProviderCategoryController;
 use App\Http\Controllers\Api\Provider\DashboardController as ProviderDashboardController;
 use App\Http\Controllers\Api\Provider\ProfileController as ProviderProfileController;
@@ -17,6 +20,10 @@ Route::get('/health', function () {
         'service' => 'bantuhub-backend-api',
     ]);
 });
+
+Route::get('/categories', [CustomerCategoryController::class, 'index']);
+Route::get('/services', [CustomerServiceController::class, 'index']);
+Route::get('/services/{service}', [CustomerServiceController::class, 'show']);
 
 Route::prefix('auth')->group(function () {
     Route::post('/register/customer', [AuthController::class, 'registerCustomer']);
@@ -63,4 +70,10 @@ Route::middleware(['auth:sanctum', 'role:provider'])
         Route::get('/services/{service}', [ProviderServiceController::class, 'show']);
         Route::put('/services/{service}', [ProviderServiceController::class, 'update']);
         Route::delete('/services/{service}', [ProviderServiceController::class, 'destroy']);
+    });
+
+Route::middleware(['auth:sanctum', 'role:customer'])
+    ->prefix('customer')
+    ->group(function () {
+        Route::get('/dashboard', CustomerDashboardController::class);
     });

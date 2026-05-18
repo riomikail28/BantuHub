@@ -214,6 +214,44 @@ Nilai `services.status`:
 
 `DELETE /api/provider/services/{id}` tidak menghapus data secara fisik. Endpoint ini menonaktifkan layanan dengan mengubah `status` menjadi `inactive`.
 
+## Public dan Customer API
+
+Endpoint public bisa diakses tanpa login:
+
+```text
+GET /api/categories
+GET /api/services
+GET /api/services/{id}
+```
+
+Endpoint customer wajib memakai bearer token Sanctum milik user dengan role `customer`:
+
+```text
+GET /api/customer/dashboard
+```
+
+Public service hanya menampilkan layanan dengan:
+
+- `services.status = active`
+- provider `users.status = active`
+- provider `verification_status = verified`
+
+Filter layanan:
+
+```text
+GET /api/services?category_id=1&service_method=home_service&min_price=50000&max_price=200000&keyword=cleaning
+```
+
+Parameter filter:
+
+- `category_id`: filter berdasarkan kategori
+- `service_method`: `home_service`, `visit_store`, atau `online_service`
+- `min_price`: harga minimum
+- `max_price`: harga maksimum
+- `keyword`: pencarian nama layanan
+
+Detail layanan menyertakan kategori, provider, profil provider, dan rating provider jika tersedia di `provider_profile.rating_average` dan `provider_profile.rating_count`.
+
 ## Seeder Awal
 
 Seeder membuat:
