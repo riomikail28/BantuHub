@@ -10,7 +10,10 @@ export interface Payment {
   total_payment: string | number;
   payment_method: "manual_transfer" | "cash";
   payment_status: "pending" | "paid" | "rejected" | "failed" | "refunded";
+  admin_note?: string | null;
   payment_proof?: string | null;
   paid_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
   booking?: Booking;
 }

@@ -25,6 +25,8 @@ export interface Booking {
   service_method: string;
   status: BookingStatus;
   total_price: string | number;
+  created_at?: string;
+  updated_at?: string;
   service?: Service;
   customer?: User;
   provider?: User;

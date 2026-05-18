@@ -11,6 +11,8 @@ export interface Complaint {
   admin_response?: string | null;
   resolved_by?: number | null;
   resolved_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
   booking?: Booking;
   customer?: User;
   provider?: User;
