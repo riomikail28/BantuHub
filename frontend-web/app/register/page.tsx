@@ -9,12 +9,12 @@ import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
-import { dashboardPathForRole, setAuthSession } from "@/lib/auth";
 import { postJson } from "@/lib/api";
 import type { AuthUserPayload, UserRoleName } from "@/types/user";
 
 interface LaravelErrorResponse {
   message?: string;
+  errors?: Record<string, string[]>;
   data?: {
     errors?: Record<string, string[]>;
   };
@@ -39,6 +39,7 @@ export default function RegisterPage() {
   const [role, setRole] = useState<Extract<UserRoleName, "customer" | "provider">>("customer");
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState<string[]>([]);
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
   function update(key: keyof typeof form, value: string) {
@@ -48,6 +49,7 @@ export default function RegisterPage() {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErrors([]);
+    setSuccess("");
     setLoading(true);
 
     try {
@@ -71,9 +73,16 @@ export default function RegisterPage() {
           : {}),
       };
 
-      const response = await postJson<AuthUserPayload>(endpoint, payload);
-      setAuthSession(response.data);
-      router.push(dashboardPathForRole(response.data.role.name));
+      await postJson<AuthUserPayload>(endpoint, payload);
+      setForm(initialForm);
+      setSuccess(
+        role === "provider"
+          ? "Registrasi mitra berhasil. Akun Anda menunggu verifikasi admin. Silakan login."
+          : "Registrasi berhasil. Silakan login.",
+      );
+      window.setTimeout(() => {
+        router.push("/login");
+      }, 1000);
     } catch (error) {
       setErrors(extractRegisterErrors(error));
     } finally {
@@ -134,6 +143,11 @@ export default function RegisterPage() {
                 </ul>
               </div>
             ) : null}
+            {success ? (
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm font-medium text-emerald-700 sm:col-span-2">
+                {success}
+              </div>
+            ) : null}
             <div className="sm:col-span-2">
               <Button className="w-full sm:w-auto" disabled={loading}>
                 {loading ? "Mendaftarkan..." : "Daftar sekarang"}
@@ -148,10 +162,12 @@ export default function RegisterPage() {
 
 function extractRegisterErrors(error: unknown): string[] {
   if (axios.isAxiosError<LaravelErrorResponse>(error)) {
-    const validationErrors = error.response?.data?.data?.errors;
+    const validationErrors = error.response?.data?.errors || error.response?.data?.data?.errors;
 
     if (validationErrors) {
-      return Object.values(validationErrors).flat();
+      return Object.entries(validationErrors).flatMap(([field, messages]) =>
+        messages.map((message) => normalizeValidationMessage(field, message)),
+      );
     }
 
     if (error.response?.data?.message) {
@@ -160,4 +176,12 @@ function extractRegisterErrors(error: unknown): string[] {
   }
 
   return ["Registrasi gagal. Periksa kembali data yang diisi."];
+}
+
+function normalizeValidationMessage(field: string, message: string): string {
+  if (field === "email" && /taken/i.test(message)) {
+    return "Email sudah digunakan. Silakan login atau gunakan email lain.";
+  }
+
+  return message;
 }
