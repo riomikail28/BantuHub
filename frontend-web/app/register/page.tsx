@@ -2,20 +2,43 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 import { PublicLayout } from "@/layouts/PublicLayout";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import { Textarea } from "@/components/ui/Textarea";
 import { dashboardPathForRole, setAuthSession } from "@/lib/auth";
 import { postJson } from "@/lib/api";
 import type { AuthUserPayload, UserRoleName } from "@/types/user";
 
+interface LaravelErrorResponse {
+  message?: string;
+  data?: {
+    errors?: Record<string, string[]>;
+  };
+}
+
+const initialForm = {
+  name: "",
+  email: "",
+  phone: "",
+  password: "",
+  password_confirmation: "",
+  address: "",
+  city: "",
+  province: "",
+  postal_code: "",
+  business_name: "",
+  bio: "",
+};
+
 export default function RegisterPage() {
   const router = useRouter();
   const [role, setRole] = useState<Extract<UserRoleName, "customer" | "provider">>("customer");
-  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", password_confirmation: "", business_name: "" });
-  const [error, setError] = useState("");
+  const [form, setForm] = useState(initialForm);
+  const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   function update(key: keyof typeof form, value: string) {
@@ -24,19 +47,35 @@ export default function RegisterPage() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError("");
+    setErrors([]);
     setLoading(true);
 
     try {
       const endpoint = role === "provider" ? "/auth/register/provider" : "/auth/register/customer";
-      const response = await postJson<AuthUserPayload>(endpoint, {
-        ...form,
+      const payload = {
+        name: form.name,
+        email: form.email,
+        phone: form.phone || null,
+        password: form.password,
+        password_confirmation: form.password_confirmation,
+        address: form.address || null,
+        city: form.city || null,
+        province: form.province || null,
+        postal_code: form.postal_code || null,
         device_name: "frontend-web",
-      });
+        ...(role === "provider"
+          ? {
+              business_name: form.business_name || null,
+              bio: form.bio || null,
+            }
+          : {}),
+      };
+
+      const response = await postJson<AuthUserPayload>(endpoint, payload);
       setAuthSession(response.data);
       router.push(dashboardPathForRole(response.data.role.name));
-    } catch {
-      setError("Registrasi gagal. Periksa kembali data yang diisi.");
+    } catch (error) {
+      setErrors(extractRegisterErrors(error));
     } finally {
       setLoading(false);
     }
@@ -57,8 +96,26 @@ export default function RegisterPage() {
             <Input label="Email" type="email" value={form.email} onChange={(event) => update("email", event.target.value)} required />
             <Input label="Nomor HP" value={form.phone} onChange={(event) => update("phone", event.target.value)} />
             {role === "provider" ? (
-              <Input label="Nama usaha" value={form.business_name} onChange={(event) => update("business_name", event.target.value)} />
+              <>
+                <Input label="Nama usaha" value={form.business_name} onChange={(event) => update("business_name", event.target.value)} />
+                <Textarea
+                  label="Deskripsi usaha"
+                  className="sm:col-span-2"
+                  value={form.bio}
+                  onChange={(event) => update("bio", event.target.value)}
+                  placeholder="Ceritakan layanan utama, pengalaman, atau area spesialisasi mitra."
+                />
+              </>
             ) : null}
+            <Textarea
+              label={role === "provider" ? "Alamat / area layanan" : "Alamat"}
+              className="sm:col-span-2"
+              value={form.address}
+              onChange={(event) => update("address", event.target.value)}
+            />
+            <Input label="Kota" value={form.city} onChange={(event) => update("city", event.target.value)} />
+            <Input label="Provinsi" value={form.province} onChange={(event) => update("province", event.target.value)} />
+            <Input label="Kode pos" value={form.postal_code} onChange={(event) => update("postal_code", event.target.value)} />
             <Input label="Password" type="password" value={form.password} onChange={(event) => update("password", event.target.value)} required />
             <Input
               label="Konfirmasi password"
@@ -67,7 +124,16 @@ export default function RegisterPage() {
               onChange={(event) => update("password_confirmation", event.target.value)}
               required
             />
-            {error ? <p className="sm:col-span-2 text-sm text-red-600">{error}</p> : null}
+            {errors.length > 0 ? (
+              <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 sm:col-span-2">
+                <div className="font-semibold">Registrasi gagal</div>
+                <ul className="mt-2 list-disc space-y-1 pl-5">
+                  {errors.map((error) => (
+                    <li key={error}>{error}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
             <div className="sm:col-span-2">
               <Button className="w-full sm:w-auto" disabled={loading}>
                 {loading ? "Mendaftarkan..." : "Daftar sekarang"}
@@ -78,4 +144,20 @@ export default function RegisterPage() {
       </main>
     </PublicLayout>
   );
+}
+
+function extractRegisterErrors(error: unknown): string[] {
+  if (axios.isAxiosError<LaravelErrorResponse>(error)) {
+    const validationErrors = error.response?.data?.data?.errors;
+
+    if (validationErrors) {
+      return Object.values(validationErrors).flat();
+    }
+
+    if (error.response?.data?.message) {
+      return [error.response.data.message];
+    }
+  }
+
+  return ["Registrasi gagal. Periksa kembali data yang diisi."];
 }

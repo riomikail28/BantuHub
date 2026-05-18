@@ -3,18 +3,57 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LogOut, Menu } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { clearAuthSession, getAuthSession } from "@/lib/auth";
+import { clearAuthSession, dashboardPathForRole, getAuthSession } from "@/lib/auth";
+import type { AuthUserPayload } from "@/types/user";
 
 export function Navbar({ onMenu }: { onMenu?: () => void }) {
   const router = useRouter();
   const pathname = usePathname();
-  const session = getAuthSession();
+  const [mounted, setMounted] = useState(false);
+  const [session, setSession] = useState<AuthUserPayload | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    setSession(getAuthSession());
+  }, []);
 
   function logout() {
     clearAuthSession();
+    setSession(null);
     router.push("/login");
   }
+
+  const authArea = !mounted ? (
+    <>
+      <Link href="/register" className="hidden sm:block">
+        <Button variant="secondary">Daftar</Button>
+      </Link>
+      <Link href="/login">
+        <Button>Masuk</Button>
+      </Link>
+    </>
+  ) : session ? (
+    <>
+      <Link href={dashboardPathForRole(session.role?.name)}>
+        <Button variant="secondary">Dashboard</Button>
+      </Link>
+      <Button variant="ghost" onClick={logout}>
+        <LogOut size={16} />
+        Keluar
+      </Button>
+    </>
+  ) : (
+    <>
+      <Link href="/register" className="hidden sm:block">
+        <Button variant="secondary">Daftar</Button>
+      </Link>
+      <Link href="/login">
+        <Button>Masuk</Button>
+      </Link>
+    </>
+  );
 
   return (
     <header className="sticky top-0 z-30 border-b border-line bg-white/90 backdrop-blur">
@@ -38,18 +77,7 @@ export function Navbar({ onMenu }: { onMenu?: () => void }) {
             Daftar
           </Link>
         </nav>
-        <div className="flex items-center gap-2">
-          {session ? (
-            <Button variant="ghost" onClick={logout}>
-              <LogOut size={16} />
-              Keluar
-            </Button>
-          ) : (
-            <Link href="/login">
-              <Button>Masuk</Button>
-            </Link>
-          )}
-        </div>
+        <div className="flex items-center gap-2">{authArea}</div>
       </div>
     </header>
   );
