@@ -152,8 +152,9 @@ Status verifikasi provider:
 - `pending`: provider baru mendaftar dan belum diverifikasi
 - `verified`: provider sudah disetujui admin
 - `rejected`: provider ditolak admin
+- `suspended`: provider dinonaktifkan admin
 
-Suspend provider akan mengubah `users.status` menjadi `suspended`.
+Suspend provider akan mengubah `users.status` dan `provider_profiles.verification_status` menjadi `suspended`.
 
 ## Provider API
 
@@ -251,6 +252,79 @@ Parameter filter:
 - `keyword`: pencarian nama layanan
 
 Detail layanan menyertakan kategori, provider, profil provider, dan rating provider jika tersedia di `provider_profile.rating_average` dan `provider_profile.rating_count`.
+
+## Booking API
+
+Endpoint booking customer wajib memakai bearer token Sanctum milik user dengan role `customer`:
+
+```text
+POST /api/customer/bookings
+GET  /api/customer/bookings
+GET  /api/customer/bookings/{id}
+```
+
+Endpoint booking provider wajib memakai bearer token Sanctum milik user dengan role `provider`:
+
+```text
+GET /api/provider/bookings
+GET /api/provider/bookings/{id}
+PUT /api/provider/bookings/{id}/accept
+PUT /api/provider/bookings/{id}/reject
+PUT /api/provider/bookings/{id}/status
+```
+
+Contoh create booking:
+
+```json
+{
+  "service_id": 1,
+  "booking_date": "2026-05-19",
+  "booking_time": "10:00",
+  "service_method": "home_service",
+  "address": "Jl. Contoh No. 1",
+  "customer_note": "Mohon datang tepat waktu."
+}
+```
+
+Booking hanya bisa dibuat untuk layanan yang:
+
+- `services.status = active`
+- provider `users.status = active`
+- provider `verification_status = verified`
+
+Status awal booking adalah `pending`. `booking_code` dibuat otomatis dengan format:
+
+```text
+BK-YYYYMMDD-0001
+```
+
+Contoh accept booking:
+
+```json
+{
+  "note": "Booking diterima."
+}
+```
+
+Contoh update status booking:
+
+```json
+{
+  "status": "on_the_way",
+  "note": "Mitra sedang menuju lokasi."
+}
+```
+
+Flow status provider tahap ini:
+
+- `pending` ke `accepted` atau `rejected`
+- `accepted` ke `on_the_way` atau `in_progress`
+- `on_the_way` ke `arrived_at_location`
+- `arrived_at_location` ke `in_progress`
+- `in_progress` ke `waiting_payment`
+- `waiting_payment` belum bisa menjadi `paid` sampai modul payment dibuat
+
+Setiap perubahan status dicatat di `booking_status_logs`.
 
 ## Seeder Awal
 

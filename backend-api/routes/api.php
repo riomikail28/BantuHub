@@ -5,9 +5,11 @@ use App\Http\Controllers\Api\Admin\DashboardController as AdminDashboardControll
 use App\Http\Controllers\Api\Admin\ProviderController as AdminProviderController;
 use App\Http\Controllers\Api\Admin\ServiceCategoryController as AdminServiceCategoryController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\Customer\BookingController as CustomerBookingController;
 use App\Http\Controllers\Api\Customer\CategoryController as CustomerCategoryController;
 use App\Http\Controllers\Api\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Api\Customer\ServiceController as CustomerServiceController;
+use App\Http\Controllers\Api\Provider\BookingController as ProviderBookingController;
 use App\Http\Controllers\Api\Provider\CategoryController as ProviderCategoryController;
 use App\Http\Controllers\Api\Provider\DashboardController as ProviderDashboardController;
 use App\Http\Controllers\Api\Provider\ProfileController as ProviderProfileController;
@@ -70,10 +72,19 @@ Route::middleware(['auth:sanctum', 'role:provider'])
         Route::get('/services/{service}', [ProviderServiceController::class, 'show']);
         Route::put('/services/{service}', [ProviderServiceController::class, 'update']);
         Route::delete('/services/{service}', [ProviderServiceController::class, 'destroy']);
+
+        Route::get('/bookings', [ProviderBookingController::class, 'index']);
+        Route::get('/bookings/{booking}', [ProviderBookingController::class, 'show']);
+        Route::put('/bookings/{booking}/accept', [ProviderBookingController::class, 'accept']);
+        Route::put('/bookings/{booking}/reject', [ProviderBookingController::class, 'reject']);
+        Route::put('/bookings/{booking}/status', [ProviderBookingController::class, 'updateStatus']);
     });
 
 Route::middleware(['auth:sanctum', 'role:customer'])
     ->prefix('customer')
     ->group(function () {
         Route::get('/dashboard', CustomerDashboardController::class);
+        Route::post('/bookings', [CustomerBookingController::class, 'store']);
+        Route::get('/bookings', [CustomerBookingController::class, 'index']);
+        Route::get('/bookings/{booking}', [CustomerBookingController::class, 'show']);
     });

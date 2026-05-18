@@ -53,6 +53,9 @@ class ProviderController extends Controller
         $user->update([
             'status' => 'suspended',
         ]);
+        $user->providerProfile?->update([
+            'verification_status' => 'suspended',
+        ]);
 
         return $this->success('Provider suspended successfully.', $this->findProvider($provider));
     }
