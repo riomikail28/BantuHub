@@ -36,6 +36,50 @@ Health check:
 GET /api/health
 ```
 
+## Environment Production
+
+Jangan commit file `.env` asli. Untuk production, set environment variable dari dashboard hosting:
+
+```env
+APP_NAME=BantuHub
+APP_ENV=production
+APP_KEY=base64:GENERATE_DI_SERVER
+APP_DEBUG=false
+APP_URL=https://domain-backend-anda
+FRONTEND_URL=https://domain-frontend-anda
+
+DB_CONNECTION=pgsql
+DB_HOST=host-database
+DB_PORT=5432
+DB_DATABASE=bantuhub
+DB_USERNAME=username
+DB_PASSWORD=password
+
+SANCTUM_STATEFUL_DOMAINS=domain-frontend-anda
+SESSION_DOMAIN=.domain-frontend-anda
+
+SESSION_DRIVER=database
+CACHE_STORE=database
+QUEUE_CONNECTION=database
+LOG_CHANNEL=stack
+LOG_LEVEL=error
+```
+
+Jika memakai MySQL, gunakan `DB_CONNECTION=mysql` dan `DB_PORT=3306`.
+
+CORS membaca `FRONTEND_URL` dari env production.
+
+Setelah deploy dan env final:
+
+```bash
+php artisan migrate --force
+php artisan db:seed --force
+php artisan config:cache
+php artisan route:cache
+```
+
+Pastikan `storage/` dan `bootstrap/cache/` writable oleh runtime hosting.
+
 ## Auth API
 
 Public endpoints:

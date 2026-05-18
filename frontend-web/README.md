@@ -17,6 +17,14 @@ Default API URL:
 NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api
 ```
 
+Untuk production di Vercel, set:
+
+```env
+NEXT_PUBLIC_API_URL=https://domain-backend-anda/api
+```
+
+Import repository ke Vercel dengan Root Directory `frontend-web`, lalu gunakan build command `npm run build`.
+
 Frontend lokal berjalan di:
 
 ```text
