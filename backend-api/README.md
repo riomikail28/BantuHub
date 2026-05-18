@@ -532,6 +532,39 @@ Customer CRM summary berisi data customer, jumlah booking, booking aktif, bookin
 
 Provider CRM summary berisi data provider, profil provider, total layanan, total booking diterima, booking selesai, earning paid, rating, total complaint, dan admin notes.
 
+## Laporan Admin
+
+Semua endpoint laporan wajib memakai bearer token Sanctum milik user dengan role `admin`.
+
+```text
+GET /api/admin/reports/overview
+GET /api/admin/reports/transactions
+GET /api/admin/reports/bookings
+GET /api/admin/reports/providers
+GET /api/admin/reports/categories
+GET /api/admin/reports/complaints
+```
+
+Contoh filter transaction report:
+
+```text
+GET /api/admin/reports/transactions?start_date=2026-05-01&end_date=2026-05-31&provider_id=5&category_id=1
+```
+
+Contoh filter booking report:
+
+```text
+GET /api/admin/reports/bookings?status=paid&start_date=2026-05-01&end_date=2026-05-31&provider_id=5&category_id=1
+```
+
+Contoh filter complaint report:
+
+```text
+GET /api/admin/reports/complaints?status=pending&start_date=2026-05-01&end_date=2026-05-31&provider_id=5
+```
+
+Report overview menghitung total transaksi, platform fee, dan provider earning dari payment yang sudah `paid`.
+
 ## Seeder Awal
 
 Seeder membuat:

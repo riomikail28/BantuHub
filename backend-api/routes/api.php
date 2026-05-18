@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Api\Admin\ProviderController as AdminProviderController;
 use App\Http\Controllers\Api\Admin\ComplaintController as AdminComplaintController;
 use App\Http\Controllers\Api\Admin\CrmController as AdminCrmController;
+use App\Http\Controllers\Api\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Api\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Api\Admin\ServiceCategoryController as AdminServiceCategoryController;
 use App\Http\Controllers\Api\AuthController;
@@ -88,6 +89,13 @@ Route::middleware(['auth:sanctum', 'role:admin'])
         Route::delete('/crm/notes/{note}', [AdminCrmController::class, 'destroy']);
         Route::get('/crm/customers/{customer}/summary', [AdminCrmController::class, 'customerSummary']);
         Route::get('/crm/providers/{provider}/summary', [AdminCrmController::class, 'providerSummary']);
+
+        Route::get('/reports/overview', [AdminReportController::class, 'overview']);
+        Route::get('/reports/transactions', [AdminReportController::class, 'transactions']);
+        Route::get('/reports/bookings', [AdminReportController::class, 'bookings']);
+        Route::get('/reports/providers', [AdminReportController::class, 'providers']);
+        Route::get('/reports/categories', [AdminReportController::class, 'categories']);
+        Route::get('/reports/complaints', [AdminReportController::class, 'complaints']);
     });
 
 Route::middleware(['auth:sanctum', 'role:provider'])
