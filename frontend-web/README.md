@@ -20,7 +20,7 @@ NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api
 Untuk production di Vercel, set:
 
 ```env
-NEXT_PUBLIC_API_URL=https://domain-backend-anda/api
+NEXT_PUBLIC_API_URL=https://bantuhub-production.up.railway.app/api
 ```
 
 Import repository ke Vercel dengan Root Directory `frontend-web`, lalu gunakan build command `npm run build`.

@@ -1,6 +1,6 @@
 <?php
 
-$frontendUrl = env('FRONTEND_URL', 'http://localhost:3000');
+$frontendUrl = rtrim((string) env('FRONTEND_URL', 'https://bantu-hub.vercel.app'), '/');
 
 return [
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
@@ -21,5 +21,5 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => true,
+    'supports_credentials' => false,
 ];

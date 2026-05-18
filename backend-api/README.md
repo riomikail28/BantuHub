@@ -45,8 +45,8 @@ APP_NAME=BantuHub
 APP_ENV=production
 APP_KEY=base64:GENERATE_DI_SERVER
 APP_DEBUG=false
-APP_URL=https://domain-backend-anda
-FRONTEND_URL=https://domain-frontend-anda
+APP_URL=https://bantuhub-production.up.railway.app
+FRONTEND_URL=https://bantu-hub.vercel.app
 
 DB_CONNECTION=pgsql
 DB_HOST=host-database
@@ -55,8 +55,8 @@ DB_DATABASE=bantuhub
 DB_USERNAME=username
 DB_PASSWORD=password
 
-SANCTUM_STATEFUL_DOMAINS=domain-frontend-anda
-SESSION_DOMAIN=.domain-frontend-anda
+SANCTUM_STATEFUL_DOMAINS=bantu-hub.vercel.app
+SESSION_DOMAIN=.bantu-hub.vercel.app
 
 SESSION_DRIVER=database
 CACHE_STORE=database
