@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Admin\DashboardController as AdminDashboardControll
 use App\Http\Controllers\Api\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Api\Admin\ProviderController as AdminProviderController;
 use App\Http\Controllers\Api\Admin\ComplaintController as AdminComplaintController;
+use App\Http\Controllers\Api\Admin\CrmController as AdminCrmController;
 use App\Http\Controllers\Api\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Api\Admin\ServiceCategoryController as AdminServiceCategoryController;
 use App\Http\Controllers\Api\AuthController;
@@ -79,6 +80,14 @@ Route::middleware(['auth:sanctum', 'role:admin'])
         Route::put('/complaints/{complaint}/process', [AdminComplaintController::class, 'process']);
         Route::put('/complaints/{complaint}/resolve', [AdminComplaintController::class, 'resolve']);
         Route::put('/complaints/{complaint}/reject', [AdminComplaintController::class, 'reject']);
+
+        Route::get('/crm/notes', [AdminCrmController::class, 'index']);
+        Route::post('/crm/notes', [AdminCrmController::class, 'store']);
+        Route::get('/crm/notes/{note}', [AdminCrmController::class, 'show']);
+        Route::put('/crm/notes/{note}', [AdminCrmController::class, 'update']);
+        Route::delete('/crm/notes/{note}', [AdminCrmController::class, 'destroy']);
+        Route::get('/crm/customers/{customer}/summary', [AdminCrmController::class, 'customerSummary']);
+        Route::get('/crm/providers/{provider}/summary', [AdminCrmController::class, 'providerSummary']);
     });
 
 Route::middleware(['auth:sanctum', 'role:provider'])

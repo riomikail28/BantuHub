@@ -69,6 +69,11 @@ class Booking extends Model
         return $this->hasMany(Complaint::class);
     }
 
+    public function adminNotes(): HasMany
+    {
+        return $this->hasMany(AdminNote::class);
+    }
+
     public function addStatusLog(?string $oldStatus, string $newStatus, ?int $changedBy, ?string $note = null): BookingStatusLog
     {
         return $this->statusLogs()->create([

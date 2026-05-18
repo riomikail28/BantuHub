@@ -484,6 +484,54 @@ Status complaint:
 - `resolved`
 - `rejected`
 
+## Mini CRM Admin
+
+Semua endpoint Mini CRM wajib memakai bearer token Sanctum milik user dengan role `admin`.
+
+```text
+GET    /api/admin/crm/notes
+POST   /api/admin/crm/notes
+GET    /api/admin/crm/notes/{id}
+PUT    /api/admin/crm/notes/{id}
+DELETE /api/admin/crm/notes/{id}
+
+GET /api/admin/crm/customers/{id}/summary
+GET /api/admin/crm/providers/{id}/summary
+```
+
+Contoh create note untuk customer:
+
+```json
+{
+  "user_id": 10,
+  "note_type": "customer_note",
+  "note": "Customer perlu follow up via WhatsApp."
+}
+```
+
+Contoh create note untuk booking:
+
+```json
+{
+  "booking_id": 20,
+  "note_type": "booking_note",
+  "note": "Booking perlu dicek manual oleh admin."
+}
+```
+
+Nilai `note_type`:
+
+- `customer_note`
+- `provider_note`
+- `booking_note`
+- `complaint_note`
+- `follow_up`
+- `warning`
+
+Customer CRM summary berisi data customer, jumlah booking, booking aktif, booking selesai, total complaint, total review, dan admin notes.
+
+Provider CRM summary berisi data provider, profil provider, total layanan, total booking diterima, booking selesai, earning paid, rating, total complaint, dan admin notes.
+
 ## Seeder Awal
 
 Seeder membuat:

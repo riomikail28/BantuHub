@@ -88,6 +88,16 @@ class User extends Authenticatable
         return $this->hasMany(Complaint::class, 'provider_id');
     }
 
+    public function adminNotes(): HasMany
+    {
+        return $this->hasMany(AdminNote::class);
+    }
+
+    public function createdAdminNotes(): HasMany
+    {
+        return $this->hasMany(AdminNote::class, 'created_by');
+    }
+
     public function hasRole(string $role): bool
     {
         return $this->role?->name === $role;
