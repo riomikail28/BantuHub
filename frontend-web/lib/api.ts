@@ -34,3 +34,13 @@ export async function postJson<T, P = unknown>(url: string, payload: P) {
   const response = await api.post<ApiResponse<T>>(url, payload);
   return response.data;
 }
+
+export async function putJson<T, P = unknown>(url: string, payload?: P) {
+  const response = await api.put<ApiResponse<T>>(url, payload);
+  return response.data;
+}
+
+export async function deleteJson<T>(url: string) {
+  const response = await api.delete<ApiResponse<T>>(url);
+  return response.data;
+}

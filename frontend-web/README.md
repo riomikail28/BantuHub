@@ -33,3 +33,13 @@ http://localhost:3000
 - Public service detail
 - Redirect dashboard berdasarkan role
 - Role-based layout untuk admin, customer, dan provider
+
+## Admin Frontend
+
+Halaman admin yang sudah terhubung ke Laravel API:
+
+- `/admin/dashboard` menggunakan `GET /api/admin/dashboard`
+- `/admin/categories` menggunakan CRUD `/api/admin/categories`
+- `/admin/providers` menggunakan `/api/admin/providers` dan aksi approve/reject/suspend
+
+Pastikan login sebagai user dengan role `admin`. Token disimpan di `localStorage` untuk tahap MVP.

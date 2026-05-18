@@ -13,13 +13,13 @@ class AdminUserSeeder extends Seeder
     {
         $adminRole = Role::query()->where('name', 'admin')->firstOrFail();
 
-        User::query()->updateOrCreate(
-            ['email' => env('ADMIN_EMAIL', 'admin@bantuhub.test')],
-            [
-                'role_id' => $adminRole->id,
-                'name' => env('ADMIN_NAME', 'BantuHub Admin'),
-                'password' => Hash::make(env('ADMIN_PASSWORD', 'password')),
-                'status' => 'active',
+        User::updateOrCreate(
+         ['email' => 'admin@bantuhub.test'],
+         [
+        'name' => 'BantuHub Admin',
+        'password' => Hash::make('password'),
+        'role_id' => $adminRole->id,
+        'status' => 'active',
             ]
         );
     }
