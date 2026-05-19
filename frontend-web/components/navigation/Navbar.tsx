@@ -11,6 +11,7 @@ import type { AuthUserPayload } from "@/types/user";
 export function Navbar({ onMenu }: { onMenu?: () => void }) {
   const router = useRouter();
   const pathname = usePathname();
+  const isHomePage = pathname === "/";
   const [mounted, setMounted] = useState(false);
   const [session, setSession] = useState<AuthUserPayload | null>(null);
 
@@ -70,12 +71,24 @@ export function Navbar({ onMenu }: { onMenu?: () => void }) {
           </Link>
         </div>
         <nav className="hidden items-center gap-6 text-sm font-medium text-muted md:flex">
-          <Link className={pathname === "/services" ? "text-ink" : "hover:text-ink"} href="/services">
-            Layanan
-          </Link>
-          <Link className={pathname === "/register" ? "text-ink" : "hover:text-ink"} href="/register">
-            Daftar
-          </Link>
+          {isHomePage ? (
+            <>
+              <Link className="hover:text-ink" href="#cara-kerja">Cara Kerja</Link>
+              <Link className="hover:text-ink" href="#kategori">Kategori</Link>
+              <Link className="hover:text-ink" href="#keunggulan">Keunggulan</Link>
+              <Link className="hover:text-ink" href="#faq">FAQ</Link>
+              <Link className="hover:text-ink" href="/register">Untuk Mitra</Link>
+            </>
+          ) : (
+            <>
+              <Link className={pathname === "/services" ? "text-ink" : "hover:text-ink"} href="/services">
+                Layanan
+              </Link>
+              <Link className={pathname === "/register" ? "text-ink" : "hover:text-ink"} href="/register">
+                Daftar
+              </Link>
+            </>
+          )}
         </nav>
         <div className="flex items-center gap-2">{authArea}</div>
       </div>
