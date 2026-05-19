@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut, Menu } from "lucide-react";
+import { ChevronDown, LogOut, Menu, Settings, UserCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { clearAuthSession, dashboardPathForRole, getAuthSession } from "@/lib/auth";
@@ -12,8 +12,10 @@ export function Navbar({ onMenu }: { onMenu?: () => void }) {
   const router = useRouter();
   const pathname = usePathname();
   const isHomePage = pathname === "/";
+  const isAdminArea = pathname.startsWith("/admin");
   const [mounted, setMounted] = useState(false);
   const [session, setSession] = useState<AuthUserPayload | null>(null);
+  const [accountOpen, setAccountOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -23,6 +25,7 @@ export function Navbar({ onMenu }: { onMenu?: () => void }) {
   function logout() {
     clearAuthSession();
     setSession(null);
+    setAccountOpen(false);
     router.push("/login");
   }
 
@@ -35,6 +38,51 @@ export function Navbar({ onMenu }: { onMenu?: () => void }) {
         <Button>Masuk</Button>
       </Link>
     </>
+  ) : session && isAdminArea ? (
+    <div className="relative">
+      <button
+        type="button"
+        className="flex items-center gap-3 rounded-lg border border-line bg-white px-2.5 py-2 text-left shadow-sm transition hover:bg-canvas"
+        onClick={() => setAccountOpen((current) => !current)}
+      >
+        <span className="grid h-8 w-8 place-items-center rounded-full bg-brand-600 text-sm font-bold text-white">
+          {session.user?.name?.charAt(0) || "A"}
+        </span>
+        <span className="hidden leading-tight sm:block">
+          <span className="block text-sm font-semibold text-ink">{session.user?.name || "Admin"}</span>
+          <span className="block text-xs text-muted">Administrator</span>
+        </span>
+        <ChevronDown size={16} className="text-muted" />
+      </button>
+      {accountOpen ? (
+        <div className="absolute right-0 mt-2 w-52 rounded-lg border border-line bg-white p-2 shadow-soft">
+          <Link
+            href="/admin/dashboard"
+            className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted hover:bg-canvas hover:text-ink"
+            onClick={() => setAccountOpen(false)}
+          >
+            <UserCircle size={16} />
+            Profil
+          </Link>
+          <Link
+            href="/admin/categories"
+            className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-muted hover:bg-canvas hover:text-ink"
+            onClick={() => setAccountOpen(false)}
+          >
+            <Settings size={16} />
+            Settings
+          </Link>
+          <button
+            type="button"
+            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+            onClick={logout}
+          >
+            <LogOut size={16} />
+            Logout
+          </button>
+        </div>
+      ) : null}
+    </div>
   ) : session ? (
     <>
       <Link href={dashboardPathForRole(session.role?.name)}>

@@ -12,9 +12,9 @@ const items = [
   { label: "Customer", href: "/admin/customers", icon: Users },
   { label: "Booking", href: "/admin/bookings", icon: ClipboardList },
   { label: "Payment", href: "/admin/payments", icon: CreditCard },
-  { label: "Complaint", href: "/admin/complaints", icon: MessageSquareWarning },
+  { label: "Complaint", href: "/admin/complaints", icon: MessageSquareWarning, badge: 2 },
   { label: "Reports", href: "/admin/reports", icon: BarChart3 },
-  { label: "CRM", href: "/admin/crm", icon: FileText },
+  { label: "CRM", href: "/admin/crm", icon: FileText, badge: 4 },
 ];
 
 export function AdminLayout({ children }: { children: ReactNode }) {

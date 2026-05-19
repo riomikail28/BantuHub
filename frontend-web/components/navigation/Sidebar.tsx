@@ -9,6 +9,7 @@ export interface SidebarItem {
   label: string;
   href: string;
   icon: LucideIcon;
+  badge?: number;
 }
 
 export function Sidebar({
@@ -47,7 +48,17 @@ export function Sidebar({
               key={item.href}
             >
               <Icon size={18} />
-              {item.label}
+              <span className="min-w-0 flex-1">{item.label}</span>
+              {typeof item.badge === "number" && item.badge > 0 ? (
+                <span
+                  className={clsx(
+                    "rounded-full px-2 py-0.5 text-xs font-bold",
+                    active ? "bg-white text-brand-700" : "bg-brand-50 text-brand-700",
+                  )}
+                >
+                  {item.badge}
+                </span>
+              ) : null}
             </Link>
           );
         })}
