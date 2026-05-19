@@ -4,7 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\AdminNote;
 use App\Models\Booking;
+use App\Models\Complaint;
+use App\Models\CrmTask;
 use App\Models\Payment;
+use App\Models\Review;
 use App\Models\Role;
 use App\Models\Service;
 use App\Models\ServiceCategory;
@@ -164,6 +167,8 @@ class AdminCrmTest extends TestCase
             ->assertJsonPath('data.customer.id', $customer->id)
             ->assertJsonPath('data.total_bookings', 1)
             ->assertJsonPath('data.completed_bookings', 1)
+            ->assertJsonPath('data.customer_status', 'active')
+            ->assertJsonPath('data.customer_score', 15)
             ->assertJsonCount(1, 'data.admin_notes');
     }
 
@@ -188,7 +193,120 @@ class AdminCrmTest extends TestCase
             ->assertJsonPath('data.total_services', 1)
             ->assertJsonPath('data.total_bookings_received', 1)
             ->assertJsonPath('data.total_earnings_paid', 122500)
+            ->assertJsonPath('data.provider_status', 'active')
+            ->assertJsonPath('data.quality_score', 60)
             ->assertJsonCount(1, 'data.admin_notes');
+    }
+
+    public function test_admin_can_manage_crm_tasks(): void
+    {
+        $this->seed();
+
+        $admin = $this->createUserWithRole('admin', 'admin@example.test');
+        $customer = $this->createUserWithRole('customer', 'customer@example.test');
+
+        Sanctum::actingAs($admin);
+
+        $createdTaskId = $this->postJson('/api/admin/crm/tasks', [
+            'assigned_to' => $admin->id,
+            'related_user_id' => $customer->id,
+            'title' => 'Follow up inactive customer',
+            'description' => 'Ask customer if they still need a service.',
+            'priority' => 'high',
+            'status' => 'pending',
+            'due_date' => now()->addDays(2)->toDateString(),
+        ])
+            ->assertCreated()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.assigned_to', $admin->id)
+            ->assertJsonPath('data.related_user_id', $customer->id)
+            ->assertJsonPath('data.priority', 'high')
+            ->json('data.id');
+
+        $this->getJson('/api/admin/crm/tasks')
+            ->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonCount(1, 'data.data');
+
+        $this->putJson("/api/admin/crm/tasks/{$createdTaskId}", [
+            'status' => 'in_progress',
+            'priority' => 'medium',
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.status', 'in_progress')
+            ->assertJsonPath('data.priority', 'medium');
+
+        $this->putJson("/api/admin/crm/tasks/{$createdTaskId}/complete")
+            ->assertOk()
+            ->assertJsonPath('data.status', 'completed');
+
+        $this->deleteJson("/api/admin/crm/tasks/{$createdTaskId}")
+            ->assertOk()
+            ->assertJsonPath('success', true);
+
+        $this->assertDatabaseMissing('crm_tasks', ['id' => $createdTaskId]);
+    }
+
+    public function test_admin_can_view_customer_timeline(): void
+    {
+        $this->seed();
+
+        $admin = $this->createUserWithRole('admin', 'admin@example.test');
+        $customer = $this->createUserWithRole('customer', 'customer@example.test');
+        $provider = $this->createProvider('provider@example.test');
+        $service = $this->createService($provider);
+        $booking = $this->createBooking($customer, $provider, $service, ['status' => 'completed']);
+        $this->createPayment($booking);
+        $this->createReview($booking);
+        $this->createComplaint($booking);
+        $this->createAdminNote($admin, ['user_id' => $customer->id, 'note_type' => 'customer_note']);
+        $this->createCrmTask($admin, ['related_user_id' => $customer->id]);
+
+        Sanctum::actingAs($admin);
+
+        $types = collect($this->getJson("/api/admin/crm/customers/{$customer->id}/timeline")
+            ->assertOk()
+            ->assertJsonPath('success', true)
+            ->json('data'))
+            ->pluck('type');
+
+        $this->assertTrue($types->contains('booking'));
+        $this->assertTrue($types->contains('payment'));
+        $this->assertTrue($types->contains('review'));
+        $this->assertTrue($types->contains('complaint'));
+        $this->assertTrue($types->contains('admin_note'));
+        $this->assertTrue($types->contains('crm_task'));
+    }
+
+    public function test_admin_can_view_provider_timeline(): void
+    {
+        $this->seed();
+
+        $admin = $this->createUserWithRole('admin', 'admin@example.test');
+        $customer = $this->createUserWithRole('customer', 'customer@example.test');
+        $provider = $this->createProvider('provider@example.test');
+        $service = $this->createService($provider);
+        $booking = $this->createBooking($customer, $provider, $service, ['status' => 'completed']);
+        $this->createPayment($booking);
+        $this->createReview($booking);
+        $this->createComplaint($booking);
+        $this->createAdminNote($admin, ['user_id' => $provider->id, 'note_type' => 'warning']);
+        $this->createCrmTask($admin, ['related_user_id' => $provider->id, 'priority' => 'high']);
+
+        Sanctum::actingAs($admin);
+
+        $types = collect($this->getJson("/api/admin/crm/providers/{$provider->id}/timeline")
+            ->assertOk()
+            ->assertJsonPath('success', true)
+            ->json('data'))
+            ->pluck('type');
+
+        $this->assertTrue($types->contains('booking'));
+        $this->assertTrue($types->contains('payment'));
+        $this->assertTrue($types->contains('review'));
+        $this->assertTrue($types->contains('complaint'));
+        $this->assertTrue($types->contains('admin_note'));
+        $this->assertTrue($types->contains('crm_task'));
     }
 
     private function createProvider(string $email): User
@@ -263,12 +381,45 @@ class AdminCrmTest extends TestCase
         ]);
     }
 
+    private function createReview(Booking $booking): Review
+    {
+        return Review::query()->create([
+            'booking_id' => $booking->id,
+            'customer_id' => $booking->customer_id,
+            'provider_id' => $booking->provider_id,
+            'rating' => 5,
+            'review_text' => 'Great service.',
+        ]);
+    }
+
+    private function createComplaint(Booking $booking): Complaint
+    {
+        return Complaint::query()->create([
+            'booking_id' => $booking->id,
+            'customer_id' => $booking->customer_id,
+            'provider_id' => $booking->provider_id,
+            'complaint_text' => 'Need admin check.',
+            'status' => 'pending',
+        ]);
+    }
+
     private function createAdminNote(User $admin, array $overrides = []): AdminNote
     {
         return AdminNote::query()->create(array_merge([
             'note_type' => 'follow_up',
             'note' => 'Initial CRM note.',
             'created_by' => $admin->id,
+        ], $overrides));
+    }
+
+    private function createCrmTask(User $admin, array $overrides = []): CrmTask
+    {
+        return CrmTask::query()->create(array_merge([
+            'assigned_to' => $admin->id,
+            'title' => 'Follow up',
+            'description' => 'Check latest activity.',
+            'priority' => 'medium',
+            'status' => 'pending',
         ], $overrides));
     }
 }

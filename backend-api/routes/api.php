@@ -87,8 +87,15 @@ Route::middleware(['auth:sanctum', 'role:admin'])
         Route::get('/crm/notes/{note}', [AdminCrmController::class, 'show']);
         Route::put('/crm/notes/{note}', [AdminCrmController::class, 'update']);
         Route::delete('/crm/notes/{note}', [AdminCrmController::class, 'destroy']);
+        Route::get('/crm/tasks', [AdminCrmController::class, 'tasks']);
+        Route::post('/crm/tasks', [AdminCrmController::class, 'storeTask']);
+        Route::put('/crm/tasks/{task}', [AdminCrmController::class, 'updateTask']);
+        Route::delete('/crm/tasks/{task}', [AdminCrmController::class, 'destroyTask']);
+        Route::put('/crm/tasks/{task}/complete', [AdminCrmController::class, 'completeTask']);
         Route::get('/crm/customers/{customer}/summary', [AdminCrmController::class, 'customerSummary']);
+        Route::get('/crm/customers/{customer}/timeline', [AdminCrmController::class, 'customerTimeline']);
         Route::get('/crm/providers/{provider}/summary', [AdminCrmController::class, 'providerSummary']);
+        Route::get('/crm/providers/{provider}/timeline', [AdminCrmController::class, 'providerTimeline']);
 
         Route::get('/reports/overview', [AdminReportController::class, 'overview']);
         Route::get('/reports/transactions', [AdminReportController::class, 'transactions']);

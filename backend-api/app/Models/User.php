@@ -98,6 +98,16 @@ class User extends Authenticatable
         return $this->hasMany(AdminNote::class, 'created_by');
     }
 
+    public function assignedCrmTasks(): HasMany
+    {
+        return $this->hasMany(CrmTask::class, 'assigned_to');
+    }
+
+    public function relatedCrmTasks(): HasMany
+    {
+        return $this->hasMany(CrmTask::class, 'related_user_id');
+    }
+
     public function hasRole(string $role): bool
     {
         return $this->role?->name === $role;
