@@ -81,16 +81,21 @@ class PaymentTest extends TestCase
             ->assertJsonPath('message', 'Booking not found.');
     }
 
-    public function test_system_calculates_two_percent_platform_fee_correctly(): void
+    public function test_system_calculates_configured_platform_fee_correctly(): void
     {
         $this->seed();
 
+        $servicePrice = 200000;
+        $feePercent = (float) config('bantuhub.platform_fee_percent');
+        $feeAmount = (int) ($servicePrice * $feePercent / 100);
+        $providerEarning = $servicePrice - $feeAmount;
+
         $customer = $this->createUserWithRole('customer', 'customer@example.test');
         $provider = $this->createProvider('provider@example.test');
-        $service = $this->createService($provider, ['price' => 200000]);
+        $service = $this->createService($provider, ['price' => $servicePrice]);
         $booking = $this->createBooking($customer, $provider, $service, [
             'status' => 'waiting_payment',
-            'total_price' => 200000,
+            'total_price' => $servicePrice,
         ]);
 
         Sanctum::actingAs($customer);
@@ -101,11 +106,11 @@ class PaymentTest extends TestCase
 
         $this->assertDatabaseHas('payments', [
             'booking_id' => $booking->id,
-            'service_price' => 200000,
-            'platform_fee_percent' => 2,
-            'platform_fee_amount' => 4000,
-            'provider_earning' => 196000,
-            'total_payment' => 200000,
+            'service_price' => $servicePrice,
+            'platform_fee_percent' => $feePercent,
+            'platform_fee_amount' => $feeAmount,
+            'provider_earning' => $providerEarning,
+            'total_payment' => $servicePrice,
         ]);
     }
 
@@ -167,12 +172,17 @@ class PaymentTest extends TestCase
     {
         $this->seed();
 
+        $servicePrice = 200000;
+        $feePercent = (float) config('bantuhub.platform_fee_percent');
+        $feeAmount = (int) ($servicePrice * $feePercent / 100);
+        $providerEarning = $servicePrice - $feeAmount;
+
         $customer = $this->createUserWithRole('customer', 'customer@example.test');
         $provider = $this->createProvider('provider@example.test');
         $otherProvider = $this->createProvider('other-provider@example.test');
-        $service = $this->createService($provider, ['price' => 200000]);
+        $service = $this->createService($provider, ['price' => $servicePrice]);
         $otherService = $this->createService($otherProvider, ['price' => 300000]);
-        $booking = $this->createBooking($customer, $provider, $service, ['status' => 'paid', 'total_price' => 200000]);
+        $booking = $this->createBooking($customer, $provider, $service, ['status' => 'paid', 'total_price' => $servicePrice]);
         $otherBooking = $this->createBooking($customer, $otherProvider, $otherService, ['status' => 'paid', 'total_price' => 300000]);
         $this->createPayment($booking, ['payment_status' => 'paid']);
         $this->createPayment($otherBooking, ['payment_status' => 'paid']);
@@ -182,9 +192,9 @@ class PaymentTest extends TestCase
         $this->getJson('/api/provider/earnings')
             ->assertOk()
             ->assertJsonPath('success', true)
-            ->assertJsonPath('data.summary.total_service_price', 200000)
-            ->assertJsonPath('data.summary.total_platform_fee', 4000)
-            ->assertJsonPath('data.summary.total_provider_earning', 196000)
+            ->assertJsonPath('data.summary.total_service_price', $servicePrice)
+            ->assertJsonPath('data.summary.total_platform_fee', $feeAmount)
+            ->assertJsonPath('data.summary.total_provider_earning', $providerEarning)
             ->assertJsonPath('data.summary.total_paid_bookings', 1);
     }
 
