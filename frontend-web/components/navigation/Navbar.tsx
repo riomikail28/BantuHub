@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { ChevronDown, LogOut, Menu, Settings, UserCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { NotificationCenter } from "@/components/navigation/NotificationCenter";
 import { clearAuthSession, dashboardPathForRole, getAuthSession } from "@/lib/auth";
 import type { AuthUserPayload } from "@/types/user";
 
@@ -138,7 +139,10 @@ export function Navbar({ onMenu }: { onMenu?: () => void }) {
             </>
           )}
         </nav>
-        <div className="flex items-center gap-2">{authArea}</div>
+        <div className="flex items-center gap-2">
+          {mounted && session ? <NotificationCenter role={session.role?.name} /> : null}
+          {authArea}
+        </div>
       </div>
     </header>
   );
