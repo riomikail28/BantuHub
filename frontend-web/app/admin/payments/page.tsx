@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { BadgeStatus } from "@/components/ui/BadgeStatus";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -10,6 +11,7 @@ import { LoadingState } from "@/components/ui/LoadingState";
 import { Modal } from "@/components/ui/Modal";
 import { Textarea } from "@/components/ui/Textarea";
 import { getJson, putJson } from "@/lib/api";
+import { toastApiError } from "@/lib/errors";
 import { formatCurrency, formatDate } from "@/lib/format";
 import type { Payment } from "@/types/payment";
 import type { Paginated } from "@/types/service";
@@ -56,9 +58,10 @@ export default function AdminPaymentsPage() {
     try {
       const response = await putJson<Payment>(`/admin/payments/${payment.id}/approve`);
       setSelected(response.data);
+      toast.success("Payment berhasil di-approve.");
       await load();
-    } catch {
-      setError("Payment gagal di-approve.");
+    } catch (error) {
+      setError(toastApiError(error, "Payment gagal di-approve.")[0]);
     } finally {
       setActionLoading(null);
     }
@@ -73,9 +76,10 @@ export default function AdminPaymentsPage() {
       setSelected(response.data);
       setRejecting(null);
       setAdminNote("");
+      toast.success("Payment berhasil di-reject.");
       await load();
-    } catch {
-      setError("Payment gagal di-reject.");
+    } catch (error) {
+      setError(toastApiError(error, "Payment gagal di-reject.")[0]);
     } finally {
       setActionLoading(null);
     }

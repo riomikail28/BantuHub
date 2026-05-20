@@ -71,6 +71,38 @@ Pastikan login sebagai user dengan role `admin`. Token disimpan di `localStorage
 - `/provider/bookings` menampilkan detail booking dan aksi update status.
 - `/admin/dashboard`, `/admin/payments`, dan `/admin/reports` menampilkan data dari API.
 
+## PWA
+
+Frontend BantuHub sudah dikonfigurasi sebagai PWA:
+
+- App name: `BantuHub`
+- Short name: `BantuHub`
+- Start URL: `/`
+- Display mode: `standalone`
+- Theme color: `#14916d`
+- Background color: `#ffffff`
+- Orientation: `portrait`
+- Manifest: `/manifest.webmanifest`
+- Service worker: `/sw.js` saat production build
+- Offline fallback basic: `/offline`
+- Icons: `public/icons/icon-192.png`, `public/icons/icon-512.png`, `public/icons/maskable-512.png`, dan `public/icons/apple-touch-icon.png`
+
+`next-pwa` dinonaktifkan saat `npm run dev`, jadi test PWA harus memakai production build:
+
+```bash
+npm run build
+npm run start
+```
+
+Langkah test manual:
+
+1. Buka `http://localhost:3000` di Chrome.
+2. Buka DevTools > Application > Manifest, pastikan name, short name, start URL, display, theme color, dan icons terbaca.
+3. Buka DevTools > Application > Service Workers, pastikan service worker aktif.
+4. Jalankan Lighthouse mode PWA atau cek tombol install browser.
+5. Buka beberapa halaman, lalu aktifkan offline mode di DevTools > Network.
+6. Reload halaman yang belum tersedia di cache dan pastikan fallback `/offline` tampil.
+
 ## Verifikasi
 
 ```bash

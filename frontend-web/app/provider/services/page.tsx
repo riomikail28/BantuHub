@@ -2,6 +2,7 @@
 
 import { Clock, Edit, Plus, Star, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { FloatingButton } from "@/components/mitra/FloatingButton";
 import { MarketplaceEmptyState } from "@/components/marketplace/MarketplaceEmptyState";
 import { SkeletonCard } from "@/components/marketplace/SkeletonCard";
@@ -13,6 +14,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { deleteJson, getJson, postJson, putJson } from "@/lib/api";
+import { toastApiError } from "@/lib/errors";
 import { formatCurrency, serviceMethodLabel } from "@/lib/format";
 import type { Paginated, Service, ServiceCategory } from "@/types/service";
 
@@ -113,10 +115,12 @@ export default function ProviderServicesPage() {
       setFormOpen(false);
       setEditing(null);
       setForm(emptyForm);
-      setMessage("Layanan berhasil disimpan.");
+      const message = "Layanan berhasil disimpan.";
+      setMessage(message);
+      toast.success(message);
       await load();
-    } catch {
-      setError("Layanan gagal disimpan. Pastikan akun sudah verified dan data valid.");
+    } catch (error) {
+      setError(toastApiError(error, "Layanan gagal disimpan. Pastikan akun sudah verified dan data valid.")[0]);
     } finally {
       setSaving(false);
     }
@@ -128,10 +132,12 @@ export default function ProviderServicesPage() {
     try {
       await deleteJson<Service>(`/provider/services/${service.id}`);
       setSelected(null);
-      setMessage("Layanan berhasil dinonaktifkan.");
+      const message = "Layanan berhasil dinonaktifkan.";
+      setMessage(message);
+      toast.success(message);
       await load();
-    } catch {
-      setError("Layanan gagal dinonaktifkan.");
+    } catch (error) {
+      setError(toastApiError(error, "Layanan gagal dinonaktifkan.")[0]);
     }
   }
 

@@ -5,6 +5,7 @@ import { ArrowLeft, CalendarDays, Clock, MapPin, ShieldCheck, Star, Store } from
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { BottomNavigation } from "@/components/marketplace/BottomNavigation";
 import { StatusBadge } from "@/components/marketplace/StatusBadge";
 import { Button } from "@/components/ui/Button";
@@ -16,6 +17,7 @@ import { Textarea } from "@/components/ui/Textarea";
 import { PublicLayout } from "@/layouts/PublicLayout";
 import { getJson, postJson } from "@/lib/api";
 import { getAuthSession } from "@/lib/auth";
+import { toastApiError } from "@/lib/errors";
 import { formatCurrency, serviceMethodLabel } from "@/lib/format";
 import type { Booking } from "@/types/booking";
 import type { Service } from "@/types/service";
@@ -59,7 +61,9 @@ export default function ServiceDetailPage() {
   async function submitBooking() {
     if (!service) return;
     if (service.service_method === "home_service" && !address) {
-      setError("Alamat wajib diisi untuk home service.");
+      const message = "Alamat wajib diisi untuk home service.";
+      setError(message);
+      toast.error(message);
       return;
     }
 
@@ -74,9 +78,12 @@ export default function ServiceDetailPage() {
         address: address || null,
         customer_note: customerNote || null,
       });
+      toast.success("Booking berhasil dibuat", {
+        description: "Mengalihkan ke halaman order.",
+      });
       router.push(`/customer/orders?booking_id=${response.data.id}`);
-    } catch {
-      setError("Booking gagal dibuat. Pastikan tanggal, jam, dan data booking valid.");
+    } catch (error) {
+      setError(toastApiError(error, "Booking gagal dibuat. Pastikan tanggal, jam, dan data booking valid.")[0]);
     } finally {
       setSaving(false);
     }

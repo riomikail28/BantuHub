@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   BriefcaseBusiness,
   Check,
@@ -20,7 +21,7 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { postJson } from "@/lib/api";
-import { extractApiErrors } from "@/lib/errors";
+import { toastApiError } from "@/lib/errors";
 import type { AuthUserPayload, UserRoleName } from "@/types/user";
 
 const initialForm = {
@@ -92,6 +93,7 @@ export default function RegisterPage() {
 
   function showGooglePlaceholder() {
     setGoogleMessage("Login Google belum tersedia pada versi demo.");
+    toast.info("Login Google belum tersedia pada versi demo.");
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -101,7 +103,9 @@ export default function RegisterPage() {
     setGoogleMessage("");
 
     if (!acceptedTerms) {
-      setErrors(["Anda harus menyetujui Syarat & Ketentuan dan Kebijakan Privasi."]);
+      const message = "Anda harus menyetujui Syarat & Ketentuan dan Kebijakan Privasi.";
+      setErrors([message]);
+      toast.error(message);
       return;
     }
 
@@ -131,16 +135,17 @@ export default function RegisterPage() {
       await postJson<AuthUserPayload>(endpoint, payload);
       setForm(initialForm);
       setAcceptedTerms(false);
-      setSuccess(
+      const successMessage =
         role === "provider"
           ? "Registrasi mitra berhasil. Akun Anda menunggu verifikasi admin. Silakan login."
-          : "Registrasi berhasil. Silakan login.",
-      );
+          : "Registrasi berhasil. Silakan login.";
+      setSuccess(successMessage);
+      toast.success(successMessage);
       window.setTimeout(() => {
         router.push("/login");
       }, 1000);
     } catch (error) {
-      setErrors(extractApiErrors(error, "Registrasi gagal. Periksa kembali data yang diisi."));
+      setErrors(toastApiError(error, "Registrasi gagal. Periksa kembali data yang diisi."));
     } finally {
       setLoading(false);
     }

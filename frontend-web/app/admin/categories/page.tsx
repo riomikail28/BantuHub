@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { BadgeStatus } from "@/components/ui/BadgeStatus";
@@ -12,6 +13,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { deleteJson, getJson, postJson, putJson } from "@/lib/api";
+import { toastApiError } from "@/lib/errors";
 import type { Paginated, ServiceCategory } from "@/types/service";
 
 interface CategoryForm {
@@ -90,9 +92,10 @@ export default function AdminCategoriesPage() {
         await postJson("/admin/categories", payload);
       }
       setModalOpen(false);
+      toast.success(editing ? "Kategori berhasil diperbarui." : "Kategori berhasil dibuat.");
       await load();
-    } catch {
-      setError("Kategori gagal disimpan.");
+    } catch (error) {
+      setError(toastApiError(error, "Kategori gagal disimpan.")[0]);
     } finally {
       setSaving(false);
     }
@@ -103,9 +106,10 @@ export default function AdminCategoriesPage() {
     setError("");
     try {
       await deleteJson(`/admin/categories/${category.id}`);
+      toast.success("Kategori berhasil dihapus.");
       await load();
-    } catch {
-      setError("Kategori gagal dihapus.");
+    } catch (error) {
+      setError(toastApiError(error, "Kategori gagal dihapus.")[0]);
     }
   }
 

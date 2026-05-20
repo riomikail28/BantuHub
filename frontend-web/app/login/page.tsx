@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import type { ReactNode } from "react";
+import { toast } from "sonner";
 import {
   BriefcaseBusiness,
   CalendarDays,
@@ -23,7 +24,7 @@ import { PublicLayout } from "@/layouts/PublicLayout";
 import { Button } from "@/components/ui/Button";
 import { dashboardPathForRole, setAuthSession } from "@/lib/auth";
 import { postJson } from "@/lib/api";
-import { extractApiErrors } from "@/lib/errors";
+import { toastApiError } from "@/lib/errors";
 import type { AuthUserPayload } from "@/types/user";
 
 const benefits = [
@@ -63,26 +64,30 @@ export default function LoginPage() {
   const [remember, setRemember] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const [toast, setToast] = useState("");
+  const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
 
   function showGooglePlaceholder() {
     setError("");
-    setToast("Login Google belum tersedia pada versi demo");
+    setNotice("Login Google belum tersedia pada versi demo");
+    toast.info("Login Google belum tersedia pada versi demo");
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    setToast("");
+    setNotice("");
     setLoading(true);
 
     try {
       const response = await postJson<AuthUserPayload>("/auth/login", { email, password, device_name: "frontend-web" });
       setAuthSession(response.data);
+      toast.success("Login berhasil", {
+        description: "Mengalihkan ke dashboard.",
+      });
       router.push(dashboardPathForRole(response.data.role.name));
     } catch (error) {
-      setError(extractApiErrors(error, "Email atau password tidak valid.")[0]);
+      setError(toastApiError(error, "Email atau password tidak valid.")[0]);
     } finally {
       setLoading(false);
     }
@@ -189,9 +194,9 @@ export default function LoginPage() {
                   Masuk dengan Google
                 </button>
 
-                {toast ? (
+                {notice ? (
                   <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-                    {toast}
+                    {notice}
                   </div>
                 ) : null}
 

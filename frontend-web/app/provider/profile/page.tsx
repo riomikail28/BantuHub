@@ -5,6 +5,7 @@ import { Banknote, BriefcaseBusiness, LogOut, Mail, MapPin, Phone, ShieldCheck, 
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { StatusBadge } from "@/components/marketplace/StatusBadge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -12,6 +13,7 @@ import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { clearAuthSession } from "@/lib/auth";
 import { getJson, putJson } from "@/lib/api";
+import { toastApiError } from "@/lib/errors";
 import type { AuthUserPayload } from "@/types/user";
 
 interface ProfileForm {
@@ -79,9 +81,11 @@ export default function ProviderProfilePage() {
     try {
       const response = await putJson<AuthUserPayload>("/provider/profile", form);
       setPayload(response.data);
-      setMessage("Profil Mitra berhasil diperbarui.");
-    } catch {
-      setError("Profil Mitra gagal diperbarui.");
+      const message = "Profil Mitra berhasil diperbarui.";
+      setMessage(message);
+      toast.success(message);
+    } catch (error) {
+      setError(toastApiError(error, "Profil Mitra gagal diperbarui.")[0]);
     } finally {
       setSaving(false);
     }

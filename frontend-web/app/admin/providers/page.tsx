@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { BadgeStatus } from "@/components/ui/BadgeStatus";
@@ -9,6 +10,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { Modal } from "@/components/ui/Modal";
 import { getJson, putJson } from "@/lib/api";
+import { toastApiError } from "@/lib/errors";
 import type { Paginated } from "@/types/service";
 import type { AuthProfile, User } from "@/types/user";
 
@@ -46,9 +48,10 @@ export default function AdminProvidersPage() {
     try {
       const response = await putJson<ProviderUser>(`/admin/providers/${provider.id}/${type}`);
       setSelected(response.data);
+      toast.success(type === "approve" ? "Mitra berhasil di-approve." : type === "reject" ? "Mitra berhasil di-reject." : "Mitra berhasil di-suspend.");
       await load();
-    } catch {
-      setError("Aksi provider gagal diproses.");
+    } catch (error) {
+      setError(toastApiError(error, "Aksi mitra gagal diproses.")[0]);
     } finally {
       setActionLoading(null);
     }

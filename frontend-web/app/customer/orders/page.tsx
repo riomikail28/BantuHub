@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { CalendarDays, CreditCard, MapPin, MessageSquareWarning, PackageOpen, Star, Store } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { OrderCard } from "@/components/marketplace/OrderCard";
 import { MarketplaceEmptyState } from "@/components/marketplace/MarketplaceEmptyState";
 import { SkeletonCard } from "@/components/marketplace/SkeletonCard";
@@ -15,6 +16,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { getJson, postJson } from "@/lib/api";
+import { toastApiError } from "@/lib/errors";
 import { formatCurrency, formatDate, serviceMethodLabel } from "@/lib/format";
 import type { Booking, BookingStatus } from "@/types/booking";
 import type { Complaint } from "@/types/complaint";
@@ -94,9 +96,11 @@ export default function CustomerOrdersPage() {
         payment_proof: paymentProof || null,
       });
       setPayment(response.data);
-      setMessage("Payment berhasil diupload dan menunggu verifikasi admin.");
-    } catch {
-      setError("Payment gagal diupload. Pastikan booking sudah waiting_payment dan belum punya payment.");
+      const message = "Payment berhasil diupload dan menunggu verifikasi admin.";
+      setMessage(message);
+      toast.success(message);
+    } catch (error) {
+      setError(toastApiError(error, "Payment gagal diupload. Pastikan booking sudah waiting_payment dan belum punya payment.")[0]);
     } finally {
       setSaving(false);
     }
@@ -113,9 +117,11 @@ export default function CustomerOrdersPage() {
         review_text: reviewText || null,
       });
       setReviewText("");
-      setMessage("Review berhasil dikirim.");
-    } catch {
-      setError("Review gagal dikirim. Booking harus paid/completed dan belum pernah direview.");
+      const message = "Review berhasil dikirim.";
+      setMessage(message);
+      toast.success(message);
+    } catch (error) {
+      setError(toastApiError(error, "Review gagal dikirim. Booking harus paid/completed dan belum pernah direview.")[0]);
     } finally {
       setSaving(false);
     }
@@ -131,10 +137,12 @@ export default function CustomerOrdersPage() {
         complaint_text: complaintText,
       });
       setComplaintText("");
-      setMessage("Complaint berhasil dibuat.");
+      const message = "Complaint berhasil dibuat.";
+      setMessage(message);
+      toast.success(message);
       await load();
-    } catch {
-      setError("Complaint gagal dibuat. Booking harus paid, completed, atau complaint.");
+    } catch (error) {
+      setError(toastApiError(error, "Complaint gagal dibuat. Booking harus paid, completed, atau complaint.")[0]);
     } finally {
       setSaving(false);
     }

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "sonner";
 
 interface ApiErrorResponse {
   message?: string;
@@ -24,6 +25,16 @@ export function extractApiErrors(error: unknown, fallback: string): string[] {
   }
 
   return [fallback];
+}
+
+export function toastApiError(error: unknown, fallback: string): string[] {
+  const messages = extractApiErrors(error, fallback);
+
+  toast.error(messages[0], {
+    description: messages.length > 1 ? messages.slice(1).join("\n") : undefined,
+  });
+
+  return messages;
 }
 
 function normalizeValidationMessage(field: string, message: string): string {

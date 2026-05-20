@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { CalendarDays, MapPin, PackageOpen, UserCircle } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { OrderCard } from "@/components/mitra/OrderCard";
 import { MarketplaceEmptyState } from "@/components/marketplace/MarketplaceEmptyState";
 import { SkeletonCard } from "@/components/marketplace/SkeletonCard";
@@ -15,6 +16,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { getJson, putJson } from "@/lib/api";
+import { toastApiError } from "@/lib/errors";
 import { formatCurrency, formatDate, serviceMethodLabel } from "@/lib/format";
 import type { Booking, BookingStatus } from "@/types/booking";
 import type { Paginated } from "@/types/service";
@@ -78,10 +80,12 @@ export default function ProviderBookingsPage() {
       const response = await putJson<Booking>(`/provider/bookings/${booking.id}/${type}`, { note: note || null });
       setSelected(response.data);
       setNote("");
-      setMessage(type === "accept" ? "Pesanan berhasil diterima." : "Pesanan berhasil ditolak.");
+      const message = type === "accept" ? "Pesanan berhasil diterima." : "Pesanan berhasil ditolak.";
+      setMessage(message);
+      toast.success(message);
       await load();
-    } catch {
-      setError("Status pesanan gagal diubah.");
+    } catch (error) {
+      setError(toastApiError(error, "Status pesanan gagal diubah.")[0]);
     } finally {
       setActionLoading(null);
     }
@@ -96,10 +100,12 @@ export default function ProviderBookingsPage() {
       const response = await putJson<Booking>(`/provider/bookings/${selected.id}/status`, { status: targetStatus, note: note || null });
       setSelected(response.data);
       setNote("");
-      setMessage("Status pesanan berhasil diperbarui.");
+      const message = "Status pesanan berhasil diperbarui.";
+      setMessage(message);
+      toast.success(message);
       await load();
-    } catch {
-      setError("Update status tidak sesuai flow booking.");
+    } catch (error) {
+      setError(toastApiError(error, "Update status tidak sesuai flow booking.")[0]);
     } finally {
       setActionLoading(null);
     }

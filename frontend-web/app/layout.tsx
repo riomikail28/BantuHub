@@ -1,13 +1,18 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
+import { ToastProvider } from "@/components/ui/ToastProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://bantuhub.vercel.app"),
   applicationName: "BantuHub",
   title: "BantuHub",
-  description: "Marketplace jasa serba bisa untuk customer dan mitra.",
+  description: "Marketplace jasa serba bisa untuk mencari, booking, dan mengelola layanan jasa terpercaya.",
   manifest: "/manifest.webmanifest",
+  formatDetection: {
+    telephone: false,
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -33,6 +38,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
       <body>
         {children}
         <InstallPrompt />
+        <ToastProvider />
       </body>
     </html>
   );

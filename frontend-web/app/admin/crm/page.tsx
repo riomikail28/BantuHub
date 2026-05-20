@@ -2,6 +2,7 @@
 
 import { Check, Edit3, Plus, Search, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { BadgeStatus } from "@/components/ui/BadgeStatus";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -13,6 +14,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { deleteJson, getJson, postJson, putJson } from "@/lib/api";
+import { toastApiError } from "@/lib/errors";
 import { formatCurrency, formatDate } from "@/lib/format";
 import type { Booking } from "@/types/booking";
 import type { Complaint } from "@/types/complaint";
@@ -262,9 +264,10 @@ export default function AdminCrmPage() {
       setEditingNote(null);
       setNoteFormOpen(false);
       setNoteForm(emptyNoteForm);
+      toast.success(editingNote ? "CRM note berhasil diperbarui." : "CRM note berhasil dibuat.");
       await loadNotes();
-    } catch {
-      setError("CRM note gagal disimpan.");
+    } catch (error) {
+      setError(toastApiError(error, "CRM note gagal disimpan.")[0]);
     } finally {
       setSaving(false);
     }
@@ -295,9 +298,10 @@ export default function AdminCrmPage() {
       setEditingTask(null);
       setTaskFormOpen(false);
       setTaskForm(emptyTaskForm);
+      toast.success(editingTask ? "CRM task berhasil diperbarui." : "CRM task berhasil dibuat.");
       await loadTasks();
-    } catch {
-      setError("CRM task gagal disimpan. Pastikan Assigned admin ID adalah user admin.");
+    } catch (error) {
+      setError(toastApiError(error, "CRM task gagal disimpan. Pastikan Assigned admin ID adalah user admin.")[0]);
     } finally {
       setSaving(false);
     }
@@ -308,9 +312,10 @@ export default function AdminCrmPage() {
     try {
       await deleteJson<null>(`/admin/crm/notes/${note.id}`);
       setSelected(null);
+      toast.success("CRM note berhasil dihapus.");
       await loadNotes();
-    } catch {
-      setError("CRM note gagal dihapus.");
+    } catch (error) {
+      setError(toastApiError(error, "CRM note gagal dihapus.")[0]);
     }
   }
 
@@ -318,9 +323,10 @@ export default function AdminCrmPage() {
     setError("");
     try {
       await deleteJson<null>(`/admin/crm/tasks/${task.id}`);
+      toast.success("CRM task berhasil dihapus.");
       await loadTasks();
-    } catch {
-      setError("CRM task gagal dihapus.");
+    } catch (error) {
+      setError(toastApiError(error, "CRM task gagal dihapus.")[0]);
     }
   }
 
@@ -328,9 +334,10 @@ export default function AdminCrmPage() {
     setError("");
     try {
       await putJson<CrmTask>(`/admin/crm/tasks/${task.id}/complete`);
+      toast.success("CRM task berhasil diselesaikan.");
       await loadTasks();
-    } catch {
-      setError("CRM task gagal diselesaikan.");
+    } catch (error) {
+      setError(toastApiError(error, "CRM task gagal diselesaikan.")[0]);
     }
   }
 

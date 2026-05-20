@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { BadgeStatus } from "@/components/ui/BadgeStatus";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -10,6 +11,7 @@ import { LoadingState } from "@/components/ui/LoadingState";
 import { Modal } from "@/components/ui/Modal";
 import { Textarea } from "@/components/ui/Textarea";
 import { getJson, putJson } from "@/lib/api";
+import { toastApiError } from "@/lib/errors";
 import { formatDate } from "@/lib/format";
 import type { Complaint } from "@/types/complaint";
 import type { Paginated } from "@/types/service";
@@ -58,9 +60,10 @@ export default function AdminComplaintsPage() {
     try {
       const response = await putJson<Complaint>(`/admin/complaints/${complaint.id}/process`, { admin_response: complaint.admin_response || null });
       setSelected(response.data);
+      toast.success("Complaint berhasil diproses.");
       await load();
-    } catch {
-      setError("Complaint gagal diproses.");
+    } catch (error) {
+      setError(toastApiError(error, "Complaint gagal diproses.")[0]);
     } finally {
       setActionLoading(null);
     }
@@ -83,9 +86,10 @@ export default function AdminComplaintsPage() {
       setSelected(response.data);
       setResponseAction(null);
       setAdminResponse("");
+      toast.success(responseAction === "resolve" ? "Complaint berhasil diselesaikan." : "Complaint berhasil ditolak.");
       await load();
-    } catch {
-      setError("Status complaint gagal diubah.");
+    } catch (error) {
+      setError(toastApiError(error, "Status complaint gagal diubah.")[0]);
     } finally {
       setActionLoading(null);
     }
