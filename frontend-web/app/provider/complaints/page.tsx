@@ -1,12 +1,13 @@
 "use client";
 
+import { MessageSquareWarning } from "lucide-react";
 import { useEffect, useState } from "react";
-import { BadgeStatus } from "@/components/ui/BadgeStatus";
+import { MarketplaceEmptyState } from "@/components/marketplace/MarketplaceEmptyState";
+import { SkeletonCard } from "@/components/marketplace/SkeletonCard";
+import { StatusBadge } from "@/components/marketplace/StatusBadge";
+import { TimelineProgress } from "@/components/marketplace/TimelineProgress";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { DataTable } from "@/components/ui/DataTable";
-import { EmptyState } from "@/components/ui/EmptyState";
-import { LoadingState } from "@/components/ui/LoadingState";
 import { Modal } from "@/components/ui/Modal";
 import { getJson } from "@/lib/api";
 import { formatDate } from "@/lib/format";
@@ -27,7 +28,7 @@ export default function ProviderComplaintsPage() {
         const response = await getJson<Paginated<Complaint>>("/provider/complaints");
         setComplaints(response.data.data);
       } catch {
-        setError("Gagal memuat complaint provider.");
+        setError("Gagal memuat Komplain.");
       } finally {
         setLoading(false);
       }
@@ -42,54 +43,70 @@ export default function ProviderComplaintsPage() {
       const response = await getJson<Complaint>(`/provider/complaints/${complaint.id}`);
       setSelected(response.data);
     } catch {
-      setError("Gagal memuat detail complaint.");
+      setError("Gagal memuat detail komplain.");
     }
   }
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-ink">Complaint Terkait</h1>
-        <p className="mt-2 text-sm text-muted">Komplain customer yang berkaitan dengan booking Anda.</p>
-      </div>
+    <div className="space-y-5">
+      <section className="rounded-3xl bg-white p-5 shadow-sm sm:p-6">
+        <h1 className="text-2xl font-bold text-ink">Komplain</h1>
+        <p className="mt-2 text-sm leading-6 text-muted">Komplain customer yang berkaitan dengan layanan kamu.</p>
+      </section>
 
-      {error ? <Card className="mb-5 border-red-200 bg-red-50 text-sm text-red-700">{error}</Card> : null}
+      {error ? <Card className="border-red-200 bg-red-50 text-sm text-red-700">{error}</Card> : null}
 
       {loading ? (
-        <LoadingState label="Memuat complaint..." />
+        <div className="grid gap-4">
+          <SkeletonCard lines={2} />
+          <SkeletonCard lines={2} />
+        </div>
       ) : complaints.length === 0 ? (
-        <EmptyState title="Belum ada complaint" description="Complaint terkait layanan Anda akan tampil di sini." />
+        <MarketplaceEmptyState title="Belum ada komplain" description="Komplain terkait layanan kamu akan tampil di sini." icon={<MessageSquareWarning size={28} />} />
       ) : (
-        <DataTable headers={["Booking", "Customer", "Service", "Complaint", "Status", "Created", "Aksi"]}>
+        <section className="grid gap-4">
           {complaints.map((complaint) => (
-            <tr key={complaint.id}>
-              <td className="px-4 py-3 font-medium">{complaint.booking?.booking_code || "-"}</td>
-              <td className="px-4 py-3 text-muted">{complaint.customer?.name || "-"}</td>
-              <td className="px-4 py-3">{complaint.booking?.service?.name || "-"}</td>
-              <td className="max-w-xs truncate px-4 py-3 text-muted">{complaint.complaint_text}</td>
-              <td className="px-4 py-3"><BadgeStatus status={complaint.status} /></td>
-              <td className="px-4 py-3">{formatDate(complaint.created_at)}</td>
-              <td className="px-4 py-3"><Button variant="secondary" onClick={() => openDetail(complaint)}>Detail</Button></td>
-            </tr>
+            <article key={complaint.id} className="rounded-xl border border-line bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-soft">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h2 className="truncate text-lg font-bold text-ink">{complaint.booking?.service?.name || complaint.booking?.booking_code || `Komplain #${complaint.id}`}</h2>
+                  <p className="mt-1 text-sm text-muted">Customer: {complaint.customer?.name || "-"}</p>
+                </div>
+                <StatusBadge status={complaint.status === "pending" ? "open" : complaint.status} />
+              </div>
+              <p className="mt-4 line-clamp-3 text-sm leading-6 text-ink">{complaint.complaint_text}</p>
+              <div className="mt-5 rounded-2xl bg-canvas p-4">
+                <TimelineProgress status={complaint.status} variant="complaint" direction="vertical" />
+              </div>
+              <div className="mt-5 flex items-center justify-between gap-3">
+                <span className="text-sm font-semibold text-muted">{formatDate(complaint.created_at)}</span>
+                <Button variant="secondary" onClick={() => openDetail(complaint)}>Detail</Button>
+              </div>
+            </article>
           ))}
-        </DataTable>
+        </section>
       )}
 
-      <Modal title="Detail complaint" open={Boolean(selected)} onClose={() => setSelected(null)}>
+      <Modal title="Detail komplain" open={Boolean(selected)} onClose={() => setSelected(null)}>
         {selected ? (
-          <div className="space-y-4 text-sm">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="text-lg font-semibold text-ink">{selected.booking?.booking_code || `Complaint #${selected.id}`}</div>
-                <div className="text-muted">{selected.booking?.service?.name || "-"}</div>
+          <div className="space-y-5 text-sm">
+            <div className="rounded-2xl bg-ink p-5 text-white">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-xs font-bold uppercase text-white/60">{selected.booking?.booking_code || `Komplain #${selected.id}`}</div>
+                  <div className="mt-2 text-xl font-bold">{selected.booking?.service?.name || "Komplain BantuHub"}</div>
+                </div>
+                <StatusBadge status={selected.status === "pending" ? "open" : selected.status} className="bg-white/15 text-white" />
               </div>
-              <BadgeStatus status={selected.status} />
             </div>
-            <p className="whitespace-pre-wrap rounded-lg border border-line bg-canvas p-3 text-ink">{selected.complaint_text}</p>
+            <div className="rounded-2xl border border-line bg-white p-4">
+              <TimelineProgress status={selected.status} variant="complaint" direction="vertical" />
+            </div>
+            <p className="whitespace-pre-wrap rounded-2xl border border-line bg-canvas p-4 text-ink">{selected.complaint_text}</p>
             {selected.admin_response ? (
-              <div>
-                <div className="mb-2 font-semibold text-ink">Response admin</div>
-                <p className="whitespace-pre-wrap rounded-lg border border-line p-3 text-muted">{selected.admin_response}</p>
+              <div className="rounded-2xl border border-line bg-white p-4">
+                <div className="mb-2 font-bold text-ink">Response admin</div>
+                <p className="whitespace-pre-wrap text-muted">{selected.admin_response}</p>
               </div>
             ) : null}
             <div className="grid gap-3 sm:grid-cols-2">

@@ -18,7 +18,8 @@ const detailSteps: TimelineStep[] = [
   { key: "booking", label: "Booking", statuses: ["pending", "accepted", "on_the_way", "arrived_at_location", "in_progress", "waiting_payment", "paid", "completed", "complaint"] },
   { key: "accepted", label: "Accepted", statuses: ["accepted", "on_the_way", "arrived_at_location", "in_progress", "waiting_payment", "paid", "completed", "complaint"] },
   { key: "progress", label: "On Progress", statuses: ["on_the_way", "arrived_at_location", "in_progress", "waiting_payment", "paid", "completed", "complaint"] },
-  { key: "payment", label: "Payment", statuses: ["waiting_payment", "paid", "completed", "complaint"] },
+  { key: "waiting_payment", label: "Waiting Payment", statuses: ["waiting_payment", "paid", "completed", "complaint"] },
+  { key: "paid", label: "Paid", statuses: ["paid", "completed", "complaint"] },
   { key: "completed", label: "Completed", statuses: ["completed"] },
 ];
 
